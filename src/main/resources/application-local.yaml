@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: knowledge-archive
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/knowledge_archive
+    username: postgres
+    password: dellinger16
+#
+#  mybatis:
+#    mapper-locations: classpath:mapper/*.xml

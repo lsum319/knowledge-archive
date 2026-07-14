@@ -17,4 +17,20 @@
         FROM
             "MATERIAL"
     </select>
+
+    <insert id="createMaterial" parameterType="com.sumin.knowledgearchive.material.dto.CreateMaterialRequest">
+        INSERT INTO "MATERIAL"
+            (
+            title
+            ,memo
+            ,url
+            ,user_id
+            )
+        VALUES
+            (
+            #{title}
+            ,#{memo}
+            ,#{url}
+            ,#[userId]
+    </insert>
 </mapper>

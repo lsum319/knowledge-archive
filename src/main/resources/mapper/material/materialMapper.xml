@@ -34,4 +34,34 @@
             ,#{userId}
             )
     </insert>
+
+    <select id="selectMaterialById" parameterType="int" resultType="com.sumin.knowledgearchive.material.MaterialDomain">
+        SELECT
+            id
+            , title
+            , memo
+            , url
+            , created_at
+            , updated_at
+            , user_id
+        FROM "MATERIAL"
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateMaterial" parameterType="com.sumin.knowledgearchive.material.MaterialDomain">
+        UPDATE
+            "MATERIAL"
+        SET
+            title = #{title}
+            , memo = #{memo}
+            , url = #{url}
+            , updated_at = CURRENT_TIMESTAMP
+        WHERE id= #{id}
+    </update>
+
+    <delete id="deleteMaterial" parameterType="int">
+        DELETE
+            FROM "MATERIAL"
+        WHERE id = #{id}
+    </delete>
 </mapper>

@@ -23,7 +23,10 @@ public class MaterialResponse {
     private Integer userId;
 
     public static MaterialResponse from(MaterialDomain domain) {
-
+        if (domain == null) {
+            System.out.println("db에 조회된 값이 없습니다.");
+            return null;
+        }
         MaterialResponse response = new MaterialResponse();
 
         response.setId(domain.getId());

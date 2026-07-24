@@ -22,7 +22,7 @@ public class MaterialController {
     // 글작성
     @PostMapping
     public void insertMaterial(@RequestBody CreateMaterialRequest request){
-        materialService.createMaterial(request);
+        materialService.insertMaterial(request);
     }
 
     // 글 상세 조회

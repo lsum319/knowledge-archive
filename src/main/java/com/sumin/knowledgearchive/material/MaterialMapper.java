@@ -6,7 +6,7 @@ import java.util.List;
 public interface MaterialMapper {
     List<MaterialDomain> selectAllMaterial();
 
-    int createMaterial(MaterialDomain domain);
+    int insertMaterial(MaterialDomain domain);
 
     MaterialDomain selectMaterialById(int id);
 

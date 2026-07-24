@@ -20,8 +20,8 @@ public class MaterialService {
                 .toList();
     }
 
-    public void createMaterial(CreateMaterialRequest request) {
-        materialMapper.createMaterial(request.toDomain());
+    public void insertMaterial(CreateMaterialRequest request) {
+        materialMapper.insertMaterial(request.toDomain());
     }
 
     public MaterialResponse selectMaterialById(int id){

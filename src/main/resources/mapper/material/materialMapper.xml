@@ -18,7 +18,7 @@
             "MATERIAL"
     </select>
 
-    <insert id="createMaterial" parameterType="com.sumin.knowledgearchive.material.MaterialDomain">
+    <insert id="insertMaterial" parameterType="com.sumin.knowledgearchive.material.MaterialDomain">
         INSERT INTO "MATERIAL"
             (
             title

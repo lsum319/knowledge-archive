@@ -16,4 +16,17 @@
             "USER"
     </select>
 
+    <insert id="insertUser" parameterType="com.sumin.knowledgearchive.user.UserDomain">
+        INSERT INTO "USER"
+            (
+            email
+            ,password
+            )
+        VALUES
+            (
+            #{email}
+            ,#{password}
+            )
+    </insert>
+
 </mapper>

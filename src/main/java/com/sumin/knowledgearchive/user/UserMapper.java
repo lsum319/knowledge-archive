@@ -1,6 +1,5 @@
 package com.sumin.knowledgearchive.user;
 
-import com.sumin.knowledgearchive.user.dto.CreateUserRequest;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -13,4 +12,8 @@ public interface UserMapper {
 
     //유저 생성
     int insertUser(UserDomain domain);
+
+    //같은 email가진 유저 수 조회
+    UserDomain selectUserByEmail(String email);
+
 }

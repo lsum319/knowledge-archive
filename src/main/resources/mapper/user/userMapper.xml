@@ -29,4 +29,14 @@
             )
     </insert>
 
+    <select id="selectUserByEmail" parameterType="String" resultType="com.sumin.knowledgearchive.user.UserDomain">
+        SELECT
+            id
+            ,email
+            ,password
+        FROM "USER"
+        WHERE
+            email = #{email}
+    </select>
+
 </mapper>

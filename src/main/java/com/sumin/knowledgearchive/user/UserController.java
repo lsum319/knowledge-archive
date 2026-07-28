@@ -1,6 +1,7 @@
 package com.sumin.knowledgearchive.user;
 
 import com.sumin.knowledgearchive.user.dto.CreateUserRequest;
+import com.sumin.knowledgearchive.user.dto.LoginRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +19,16 @@ public class UserController {
         return userService.selectAllUser();
     }
 
-    // 유저 생성(회원가입
+    // 유저 생성(회원가입)
     @PostMapping
     public void insertUser(@RequestBody CreateUserRequest request){
         userService.insertUser(request);
+    }
+
+    //로그인
+    @GetMapping("/login")
+    public void loginUser(@RequestBody LoginRequest request){
+        userService.loginUser(request);
     }
 
 }

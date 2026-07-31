@@ -2,6 +2,7 @@ package com.sumin.knowledgearchive.user;
 
 import com.sumin.knowledgearchive.user.dto.CreateUserRequest;
 import com.sumin.knowledgearchive.user.dto.LoginRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class UserController {
 
     // 유저 생성(회원가입)
     @PostMapping
-    public void insertUser(@RequestBody CreateUserRequest request){
+    public void insertUser(@Valid @RequestBody CreateUserRequest request){
         userService.insertUser(request);
     }
 

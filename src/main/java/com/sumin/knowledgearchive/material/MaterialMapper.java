@@ -4,7 +4,7 @@ import java.util.List;
 
 @org.apache.ibatis.annotations.Mapper
 public interface MaterialMapper {
-    List<MaterialDomain> selectAllMaterial();
+    List<MaterialDomain> selectMaterials(String title);
 
     int insertMaterial(MaterialDomain domain);
 

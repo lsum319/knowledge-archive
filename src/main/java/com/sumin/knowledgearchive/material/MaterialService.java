@@ -4,7 +4,6 @@ import com.sumin.knowledgearchive.material.dto.CreateMaterialRequest;
 import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.material.dto.UpdateMaterialRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -13,20 +12,20 @@ import java.util.List;
 public class MaterialService {
     private final MaterialMapper materialMapper;
 
-    public List<MaterialResponse> selectAllMaterial(){
-        return materialMapper.selectAllMaterial()
+    public List<MaterialResponse> selectMaterials(String title){
+        return materialMapper.selectMaterials(title)
                 .stream()
                 .map(MaterialResponse::from)
                 .toList();
     }
 
-    public void insertMaterial(CreateMaterialRequest request) {
-        materialMapper.insertMaterial(request.toDomain());
-    }
-
     public MaterialResponse selectMaterialById(int id){
         MaterialDomain domain = materialMapper.selectMaterialById(id);
         return MaterialResponse.from(domain);
+    }
+
+    public void insertMaterial(CreateMaterialRequest request) {
+        materialMapper.insertMaterial(request.toDomain());
     }
 
     public void updateMaterial(int id, UpdateMaterialRequest request){

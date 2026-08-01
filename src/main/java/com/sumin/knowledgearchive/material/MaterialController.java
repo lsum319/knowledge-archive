@@ -17,10 +17,11 @@ import java.util.List;
 public class MaterialController {
     private final MaterialService materialService;
 
-    @Operation(summary = "자료 목록 조회")
+    // 자료 검색
+    @Operation(summary = "자료 검색")
     @GetMapping
-    public List<MaterialResponse> selectAllMaterial(){
-        return materialService.selectAllMaterial();
+    public List<MaterialResponse> selectMaterials(@RequestParam(required = false) String title){
+        return materialService.selectMaterials(title);
     }
 
     // 자료 등록
@@ -51,4 +52,6 @@ public class MaterialController {
     public void deleteMaterialById(@PathVariable("id") int id){
         materialService.deleteMaterial(id);
     }
+
+
 }

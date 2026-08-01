@@ -1,5 +1,6 @@
 package com.sumin.knowledgearchive.user;
 
+import com.sumin.knowledgearchive.common.exception.DuplicateEmailException;
 import com.sumin.knowledgearchive.common.exception.UserNotFoundException;
 import com.sumin.knowledgearchive.common.exception.WrongPasswordException;
 import com.sumin.knowledgearchive.user.dto.CreateUserRequest;
@@ -22,6 +23,12 @@ public class UserService {
 
     //회원가입
     public void insertUser(CreateUserRequest request){
+        // 기존에 가입된 이메일인지 체크
+        UserDomain userDomain = userMapper.selectUserByEmail(request.getEmail());
+        if (userDomain != null) {
+            throw new DuplicateEmailException("이미 가입된 이메일입니다.");
+        }
+
         userMapper.insertUser(request.toDomain());
     }
 

@@ -13,7 +13,7 @@ public interface UserMapper {
     //유저 생성
     int insertUser(UserDomain domain);
 
-    //같은 email가진 유저 수 조회
+    //같은 email가진 유저 조회
     UserDomain selectUserByEmail(String email);
 
 }

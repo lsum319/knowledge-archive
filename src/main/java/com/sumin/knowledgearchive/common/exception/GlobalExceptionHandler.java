@@ -20,12 +20,21 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    // 중복 이메일
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException e){
+        ErrorResponse response = new ErrorResponse(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
     // 입력된 이메일과 일치하는 유저 없음
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException e) {
         ErrorResponse response = new ErrorResponse(e.getMessage());
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
     

@@ -42,7 +42,7 @@ public class MaterialController {
     @Operation(summary = "자료 수정")
     @PutMapping("/{id}")
     public void updateMaterialById(@PathVariable("id") int id
-                                            , @RequestBody UpdateMaterialRequest request){
+                                , @RequestBody UpdateMaterialRequest request){
         materialService.updateMaterial(id, request);
     }
 

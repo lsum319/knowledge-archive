@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sumin.knowledgearchive.tag.TagMapper">
+    <select id="selectTags" parameterType="String" resultType="com.sumin.knowledgearchive.tag.TagDomain">
+        SELECT
+        id
+        ,name
+        ,created_at
+        ,updated_at
+        FROM "TAG"
+        <where>
+            <if test="name != null and name != ''">
+                name LIKE '%' || #{name} || '%'
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertTag" parameterType="com.sumin.knowledgearchive.tag.TagDomain">
+        INSERT INTO "TAG"
+        (name) VALUES (#{name})
+    </insert>
+
+    <select id="selectTagById" parameterType="int" resultType="com.sumin.knowledgearchive.tag.TagDomain">
+        SELECT
+        id
+        ,name
+        , created_at
+        , updated_at
+        FROM "TAG"
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateTag" parameterType="com.sumin.knowledgearchive.tag.TagDomain">
+        UPDATE
+        "TAG"
+        SET
+        name = #{name}
+        , updated_at = CURRENT_TIMESTAMP
+        WHERE id= #{id}
+    </update>
+
+    <delete id="deleteTag" parameterType="int">
+        DELETE
+        FROM "TAG"
+        WHERE id = #{id}
+    </delete>
+</mapper>

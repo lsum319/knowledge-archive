@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sumin.knowledgearchive.material.MaterialMapper">
+    <insert id="insertMaterialTag" parameterType="int">
+        INSERT INTO "MATERIAL_TAG"
+            (
+            material_id
+            ,tag_id
+            )
+        VALUES
+            (
+            #{materialId}
+            ,#{tagId}
+            )
+    </insert>
+
+    <delete id="deleteMaterialTag" parameterType="int">
+        DELETE FROM "MATERIAL_TAG"
+        WHERE material_id = #{materialId}
+    </delete>
+</mapper>

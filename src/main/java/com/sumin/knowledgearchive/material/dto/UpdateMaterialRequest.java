@@ -3,6 +3,9 @@ package com.sumin.knowledgearchive.material.dto;
 import com.sumin.knowledgearchive.material.MaterialDomain;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class UpdateMaterialRequest {
 
@@ -12,6 +15,7 @@ public class UpdateMaterialRequest {
 
     private String url;
 
+    private List<Integer> tagIds =  new ArrayList<>();
 
     public MaterialDomain toDomain() {
 

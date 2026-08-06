@@ -22,7 +22,8 @@
         </where>
     </select>
 
-    <insert id="insertMaterial" parameterType="com.sumin.knowledgearchive.material.MaterialDomain">
+    <insert id="insertMaterial" parameterType="com.sumin.knowledgearchive.material.MaterialDomain"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO "MATERIAL"
             (
             title

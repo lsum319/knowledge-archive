@@ -4,6 +4,7 @@ import com.sumin.knowledgearchive.material.dto.CreateMaterialRequest;
 import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.material.dto.UpdateMaterialRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,17 +25,40 @@ public class MaterialService {
         return MaterialResponse.from(domain);
     }
 
+    @Transactional
     public void insertMaterial(CreateMaterialRequest request) {
-        materialMapper.insertMaterial(request.toDomain());
+
+        MaterialDomain materialDomain = request.toDomain();
+        //insert 후 pk가 materialDomain에 세팅
+        materialMapper.insertMaterial(materialDomain);
+
+        // 자료 태그 생성
+        insertMaterialTag(materialDomain.getId(), request.getTagIds());
     }
 
-    public void updateMaterial(int id, UpdateMaterialRequest request){
+    @Transactional
+    public void updateMaterial(int materialId, UpdateMaterialRequest request){
         MaterialDomain domain = request.toDomain();
-        domain.setId(id);
+        domain.setId(materialId);
         materialMapper.updateMaterial(domain);
+
+        // 자료 태그 업데이트
+        materialMapper.deleteMaterialTag(materialId);
+        insertMaterialTag(materialId, request.getTagIds());
+
     }
 
+    @Transactional
     public void deleteMaterial(int id){
         materialMapper.deleteMaterial(id);
+        materialMapper.deleteMaterialTag(id);
+    }
+
+    // 자료 태그 생성
+    public void insertMaterialTag(int materialId, List<Integer> tagIds){
+        // materialDTO에서 tagId의 List객체 새로 생성하여 빈값/null검증 필요없음
+        for(Integer tagId : tagIds){
+            materialMapper.insertMaterialTag(materialId, tagId);
+        }
     }
 }

@@ -1,9 +1,11 @@
 package com.sumin.knowledgearchive.material.dto;
 
 import com.sumin.knowledgearchive.material.MaterialDomain;
+import com.sumin.knowledgearchive.tag.TagDomain;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class MaterialResponse {
@@ -15,6 +17,8 @@ public class MaterialResponse {
     private String memo;
 
     private String url;
+
+    private List<TagDomain> tags;
 
     private LocalDateTime createdAt;
 
@@ -33,6 +37,7 @@ public class MaterialResponse {
         response.setTitle(domain.getTitle());
         response.setMemo(domain.getMemo());
         response.setUrl(domain.getUrl());
+        response.setTags(domain.getTags());
         response.setCreatedAt(domain.getCreatedAt());
         response.setUpdatedAt(domain.getUpdatedAt());
         response.setUserId(domain.getUserId());

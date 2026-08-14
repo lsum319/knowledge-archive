@@ -7,6 +7,7 @@ import com.sumin.knowledgearchive.user.dto.CreateUserRequest;
 import com.sumin.knowledgearchive.user.dto.LoginRequest;
 import com.sumin.knowledgearchive.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     public List<UserDomain> selectAllUser(){
@@ -29,6 +31,8 @@ public class UserService {
             throw new DuplicateEmailException("이미 가입된 이메일입니다.");
         }
 
+        //비밀번호 인코딩
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
         userMapper.insertUser(request.toDomain());
     }
 

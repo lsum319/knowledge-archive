@@ -31,10 +31,10 @@ public class UserController {
     }
 
     //로그인
-    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인")
+/*    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인")
     @GetMapping("/login")
     public void loginUser(@RequestBody LoginRequest request){
         userService.loginUser(request);
-    }
+    }*/
 
 }

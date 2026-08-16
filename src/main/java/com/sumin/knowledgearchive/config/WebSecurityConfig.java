@@ -1,7 +1,6 @@
 package com.sumin.knowledgearchive.config;
 
-import com.sumin.knowledgearchive.common.exception.CustomAuthenticationFailureHandler;
-import com.sumin.knowledgearchive.user.CustomUserDetailsService;
+import com.sumin.knowledgearchive.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

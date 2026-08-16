@@ -1,5 +1,6 @@
-package com.sumin.knowledgearchive.user;
+package com.sumin.knowledgearchive.security;
 
+import com.sumin.knowledgearchive.user.UserDomain;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

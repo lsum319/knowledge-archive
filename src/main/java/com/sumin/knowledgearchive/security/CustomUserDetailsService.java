@@ -1,5 +1,7 @@
-package com.sumin.knowledgearchive.user;
+package com.sumin.knowledgearchive.security;
 
+import com.sumin.knowledgearchive.user.UserDomain;
+import com.sumin.knowledgearchive.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

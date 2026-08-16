@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 @RequiredArgsConstructor
 @Configuration
@@ -27,16 +28,19 @@ public class WebSecurityConfig {
             CustomUserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
 
+        //DaoAuthenticationProvider가 사용할 userDetailsService 지정
         DaoAuthenticationProvider provider =
                 new DaoAuthenticationProvider(userDetailsService);
 
+        // DaoAuthenticationProvider가 사용할 passwordEncoder 지정
         provider.setPasswordEncoder(passwordEncoder);
 
         return provider;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http
+                                                   , AuthenticationFailureHandler authenticationFailureHandler) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -50,7 +54,7 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 ).formLogin((form) -> form
                         .loginProcessingUrl("/user/login")
-                        .failureHandler(new CustomAuthenticationFailureHandler())
+                        .failureHandler(authenticationFailureHandler)
                         .permitAll()
                 );
         return http.build();

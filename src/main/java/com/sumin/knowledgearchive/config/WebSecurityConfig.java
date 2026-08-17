@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @RequiredArgsConstructor
 @Configuration
@@ -39,7 +40,8 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http
-                                                   , AuthenticationFailureHandler authenticationFailureHandler) throws Exception {
+                                                   , AuthenticationFailureHandler authenticationFailureHandler
+                                                    , AuthenticationSuccessHandler authenticationSuccessHandler) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -53,11 +55,11 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 ).formLogin((form) -> form
                         .loginProcessingUrl("/user/login")
+                        .usernameParameter("email")
+                        .successHandler(authenticationSuccessHandler)
                         .failureHandler(authenticationFailureHandler)
                         .permitAll()
                 );
         return http.build();
     }
-
-
 }

@@ -1,7 +1,6 @@
 package com.sumin.knowledgearchive.user;
 
 import com.sumin.knowledgearchive.user.dto.CreateUserRequest;
-import com.sumin.knowledgearchive.user.dto.LoginRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

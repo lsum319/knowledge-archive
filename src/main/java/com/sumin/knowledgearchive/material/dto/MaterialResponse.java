@@ -24,7 +24,7 @@ public class MaterialResponse {
 
     private LocalDateTime updatedAt;
 
-    private Integer userId;
+    private int userId;
 
     public static MaterialResponse from(MaterialDomain domain) {
         if (domain == null) {

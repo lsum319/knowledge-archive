@@ -3,7 +3,10 @@ package com.sumin.knowledgearchive.material;
 import com.sumin.knowledgearchive.material.dto.CreateMaterialRequest;
 import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.material.dto.UpdateMaterialRequest;
+import com.sumin.knowledgearchive.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,6 +31,12 @@ public class MaterialService {
     @Transactional
     public void insertMaterial(CreateMaterialRequest request) {
 
+        // 로그인 세션에서 user_id 정보 가져옴
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+        int userId = userDetails.getUserId();
+        request.setUserId(userId);
         MaterialDomain materialDomain = request.toDomain();
         //insert 후 pk가 materialDomain에 세팅
         materialMapper.insertMaterial(materialDomain);

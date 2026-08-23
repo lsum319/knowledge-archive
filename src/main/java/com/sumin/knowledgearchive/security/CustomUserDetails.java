@@ -19,6 +19,10 @@ public class CustomUserDetails implements UserDetails {
         return List.of();
     }
 
+    public int getUserId() {
+        return userDomain.getId();
+    }
+
     @Override
     public String getPassword() {
         return userDomain.getPassword();

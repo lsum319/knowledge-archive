@@ -48,4 +48,10 @@
         FROM "TAG"
         WHERE id = #{id}
     </delete>
+
+    <delete id="deleteMaterialTagByTagId" parameterType="int">
+        DELETE
+        FROM "MATERIALTAG"
+        WHERE tag_id = #{tagId}
+    </delete>
 </mapper>

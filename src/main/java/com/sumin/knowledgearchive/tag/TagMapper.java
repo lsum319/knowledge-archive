@@ -20,5 +20,8 @@ public interface TagMapper {
     int updateTag(TagDomain tagDomain);
 
     //태그 삭제
-    int deleteTag( int id);
+    int deleteTag(int id);
+
+    //materialTag 삭제
+    int deleteMaterialTagByTagId(int id);
 }

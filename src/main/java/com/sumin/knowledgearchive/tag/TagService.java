@@ -5,6 +5,7 @@ import com.sumin.knowledgearchive.tag.dto.TagResponse;
 import com.sumin.knowledgearchive.tag.dto.UpdateTagRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -36,12 +37,13 @@ public class TagService {
     public int updateTag(int id, UpdateTagRequest tagRequest){
         TagDomain tagDomain = tagRequest.toDomain();
         tagDomain.setId(id);
-        System.out.println(tagDomain.toString());
         return tagMapper.updateTag(tagDomain);
     }
 
     // 태그 삭제
+    @Transactional
     public int deleteTag(int id){
+        tagMapper.deleteMaterialTagByTagId(id);
         return tagMapper.deleteTag(id);
     }
 

@@ -40,8 +40,9 @@
         LEFT JOIN "TAG" t
             ON t.id = mt.tag_id
         <where>
+            user_id = #{userId}
             <if test="title != null and title != ''">
-                title LIKE '%' || #{title} || '%'
+                AND title LIKE '%' || #{title} || '%'
             </if>
         </where>
     </select>
@@ -81,6 +82,7 @@
         LEFT JOIN "TAG" t
             ON t.id = mt.tag_id
         WHERE m.id = #{id}
+            AND user_id = #{userId}
     </select>
 
     <update id="updateMaterial" parameterType="com.sumin.knowledgearchive.material.MaterialDomain">

@@ -65,12 +65,6 @@ public class MaterialService {
     public void updateMaterial(int materialId, UpdateMaterialRequest request){
         MaterialDomain materialDomain = request.toDomain();
 
-        // 로그인 세션에서 user_id 정보 가져옴
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-        int userId = userDetails.getUserId();
-
         // 수정할 자료의 pk 세팅
         materialDomain.setId(materialId);
         materialMapper.updateMaterial(materialDomain);

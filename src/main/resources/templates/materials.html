@@ -1,4 +1,40 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>My Material List</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
-<body><main class="container wide"><header class="header"><h1>My Material List</h1><div class="actions"><a class="button primary" href="/material-create.html">Add New Material</a><a class="button secondary" href="/tags.html">Manage Tags</a><form action="/logout" method="post"><button class="button danger" type="submit">Logout</button></form></div></header><section class="panel"><form class="header" method="get" action="/materials.html"><div class="actions"><input name="title" th:value="${searchTitle}" type="search" placeholder="Search material title"><button class="button secondary" type="submit">Search</button></div></form><div class="list" th:if="${!#lists.isEmpty(materials)}"><article class="material" th:each="item : ${materials}"><h2><a th:href="@{/material-detail.html(id=${item.id})}" th:text="${item.title}">Title</a></h2><p><strong>Created:</strong> <span th:text="${item.createdAt}">Date</span></p><p th:text="${item.memo ?: 'No memo available.'}">Memo</p><p th:if="${item.url}"><strong>Link:</strong> <a class="url" th:href="${item.url}" th:text="${item.url}" target="_blank" rel="noopener noreferrer">URL</a></p><div class="tags"><span class="tag" th:each="tag : ${item.tags}" th:text="${tag.name}">Tag</span></div></article></div><div class="empty" th:if="${#lists.isEmpty(materials)}">No materials registered.</div></section></main></body></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Material List</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container wide">
+    <header class="header"><h1>My Material List</h1>
+        <div class="actions"><a class="button primary" href="/material-create.html">Add New Material</a><a
+                class="button secondary" href="/tags.html">Manage Tags</a>
+            <form action="/logout" method="post">
+                <button class="button danger" type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+    <section class="panel">
+        <form class="header" method="get" action="/materials.html">
+            <div class="actions"><input name="title" th:value="${searchTitle}" type="search"
+                                        placeholder="Search material title">
+                <button class="button secondary" type="submit">Search</button>
+            </div>
+        </form>
+        <div class="list" th:if="${!#lists.isEmpty(materials)}">
+            <article class="material" th:each="item : ${materials}"><h2><a
+                    th:href="@{/material-detail.html(id=${item.id})}" th:text="${item.title}">Title</a></h2>
+                <p><strong>Created:</strong> <span th:text="${item.createdAt}">Date</span></p>
+                <p th:text="${item.memo ?: 'No memo available.'}">Memo</p>
+                <p th:if="${item.url}"><strong>Link:</strong> <a class="url" th:href="${item.url}" th:text="${item.url}"
+                                                                 target="_blank" rel="noopener noreferrer">URL</a></p>
+                <div class="tags"><span class="tag" th:each="tag : ${item.tags}" th:text="${tag.name}">Tag</span></div>
+            </article>
+        </div>
+        <div class="empty" th:if="${#lists.isEmpty(materials)}">No materials registered.</div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,4 +1,24 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Manage Tags</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
-<body><main class="container"><header class="header"><h1>Manage Tags</h1><a class="button secondary" href="/materials.html">Back to Materials</a></header><section class="card"><form id="create" class="create-form"><input id="newName" placeholder="New tag name" required><button class="button primary" type="submit">Add Tag</button></form><div id="message" class="message"></div><div id="list"></div></section></main><script th:src="@{/js/tags.js}"></script></body></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Tags</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container">
+    <header class="header"><h1>Manage Tags</h1><a class="button secondary" href="/materials.html">Back to Materials</a>
+    </header>
+    <section class="card">
+        <form id="create" class="create-form">
+            <input id="newName" placeholder="New tag name" required>
+            <button class="button primary" type="submit">Add Tag</button>
+        </form>
+        <div id="message" class="message"></div>
+        <div id="list"></div>
+    </section>
+</main>
+<script th:src="@{/js/tags.js}"></script>
+</body>
+</html>

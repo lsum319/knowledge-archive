@@ -1,1 +1,16 @@
-document.getElementById('loginForm').addEventListener('submit',async event=>{event.preventDefault();const message=document.getElementById('message');const formData=new URLSearchParams(new FormData(event.currentTarget));try{const response=await fetch('/user/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:formData});if(response.ok)location.href='/materials.html';else message.textContent='Login failed.'}catch(error){console.error(error);message.textContent='Login request failed.'}});
+document.getElementById('loginForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const message = document.getElementById('message');
+    const formData = new URLSearchParams(new FormData(event.currentTarget));
+    try {
+        const response = await fetch('/user/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: formData
+        });
+        if (response.ok) location.href = '/materials.html'; else message.textContent = 'Login failed.'
+    } catch (error) {
+        console.error(error);
+        message.textContent = 'Login request failed.'
+    }
+});

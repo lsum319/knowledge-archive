@@ -17,11 +17,18 @@ import java.util.List;
 public class MaterialController {
     private final MaterialService materialService;
 
-    // 자료 검색
-    @Operation(summary = "자료 검색")
-    @GetMapping
+    // 제목으로 자료 검색
+    @Operation(summary = "제목으로 자료 검색")
+    @GetMapping(params = "title")
     public List<MaterialResponse> selectMaterials(@RequestParam(required = false) String title){
         return materialService.selectMaterials(title);
+    }
+
+    // 태그로 자료 검색
+    @Operation(summary = "태그로 자료 검색")
+    @GetMapping(params = "tags")
+    public List<MaterialResponse> selectMaterialsByTag(@RequestParam(required = false) List<String> tags) {
+        return materialService.selectMaterialsByTag(tags);
     }
 
     // 자료 등록

@@ -8,6 +8,8 @@ import java.util.List;
 public interface MaterialMapper {
     List<MaterialDomain> selectMaterials(int userId, String title);
 
+    List<MaterialDomain> selectMaterialsByTag(int userId, List<String> tags);
+
     int insertMaterial(MaterialDomain domain);
 
     MaterialDomain selectMaterialById(int userId, int id);

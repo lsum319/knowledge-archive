@@ -22,7 +22,6 @@
         </collection>
     </resultMap>
 
-
     <select id="selectMaterials" parameterType="String" resultMap="materialResultMap">
         SELECT
             m.id
@@ -40,9 +39,44 @@
         LEFT JOIN "TAG" t
             ON t.id = mt.tag_id
         <where>
-            user_id = #{userId}
+            m.user_id = #{userId}
             <if test="title != null and title != ''">
                 AND title LIKE '%' || #{title} || '%'
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMaterialsByTag" resultMap="materialResultMap">
+        SELECT
+        m.id
+        ,m.title
+        ,m.memo
+        ,m.url
+        ,t.id AS tag_id
+        ,t.name AS tag_name
+        ,m.created_at
+        ,m.updated_at
+        ,m.user_id
+        FROM "MATERIAL" m
+        LEFT JOIN "MATERIAL_TAG" mt
+        ON m.id = mt.material_id
+        LEFT JOIN "TAG" t
+        ON t.id = mt.tag_id
+        <where>
+            m.user_id = #{userId}
+            <if test="tags != null and tags.size() > 0">
+                AND EXISTS (
+                    SELECT 1
+                    FROM "MATERIAL_TAG" mt2
+                    INNER JOIN "TAG" t2
+                        ON t2.id = mt2.tag_id
+                    WHERE mt2.material_id = m.id
+                    AND (
+                        <foreach collection="tags" item="tag" separator=" OR ">
+                            t2.name LIKE '%' || #{tag} || '%'
+                        </foreach>
+                    )
+                )
             </if>
         </where>
     </select>

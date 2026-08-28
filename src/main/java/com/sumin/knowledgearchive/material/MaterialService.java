@@ -16,7 +16,7 @@ import java.util.List;
 public class MaterialService {
     private final MaterialMapper materialMapper;
 
-    // 전체 자료 조회
+    // 제목으로 전체 자료 조회
     public List<MaterialResponse> selectMaterials(String title){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails =
@@ -24,6 +24,19 @@ public class MaterialService {
         int userId = userDetails.getUserId();
 
         return materialMapper.selectMaterials(userId, title)
+                .stream()
+                .map(MaterialResponse::from)
+                .toList();
+    }
+
+    // 태그로 전체 자료 조회
+    public List<MaterialResponse> selectMaterialsByTag(List<String> tags){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+        int userId = userDetails.getUserId();
+
+        return materialMapper.selectMaterialsByTag(userId, tags)
                 .stream()
                 .map(MaterialResponse::from)
                 .toList();

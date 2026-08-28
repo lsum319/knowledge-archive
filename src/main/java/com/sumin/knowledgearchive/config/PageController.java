@@ -36,9 +36,8 @@ public class PageController {
     }
 
     @GetMapping({"/materials", "/materials.html"})
-    public String materials(@RequestParam(required = false) String title, Model model) {
-        model.addAttribute("materials", materialService.selectMaterials(title));
-        model.addAttribute("searchTitle", title == null ? "" : title);
+    public String materials(Model model) {
+        model.addAttribute("materials", materialService.selectMaterials(null));
         return "materials";
     }
 

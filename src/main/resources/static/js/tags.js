@@ -54,7 +54,7 @@ async function deleteTag(id) {
         await load()
     } catch (error) {
         console.error(error);
-        message.textContent = 'Failed to delete tag. It may be in use.'
+        message.textContent = 'Failed to delete tag.'
     }
 }
 

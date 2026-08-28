@@ -1,5 +1,6 @@
 package com.sumin.knowledgearchive.tag;
 
+import com.sumin.knowledgearchive.material.MaterialMapper;
 import com.sumin.knowledgearchive.tag.dto.CreateTagRequest;
 import com.sumin.knowledgearchive.tag.dto.TagResponse;
 import com.sumin.knowledgearchive.tag.dto.UpdateTagRequest;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TagService {
     private final TagMapper tagMapper;
+    private final MaterialMapper materialMapper;
 
     // 전체 태그 조회
     public List<TagResponse> selectTags(String name){
@@ -43,6 +45,8 @@ public class TagService {
     // 태그 삭제
     @Transactional
     public int deleteTag(int id){
+        // 태그를 사용중인 material에서 해당 태그 정보 삭제
+        materialMapper.deleteMaterialTag(id);
         tagMapper.deleteMaterialTagByTagId(id);
         return tagMapper.deleteTag(id);
     }

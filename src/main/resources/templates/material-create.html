@@ -1,4 +1,32 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Create Material</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
-<body><main class="container"><header class="header"><h1>Create Material</h1><a class="button secondary" href="/materials.html">Back to List</a></header><section class="card"><form id="form" class="form"><div class="field"><label for="title">Title</label><input id="title" required></div><div class="field"><label for="url">Reference URL</label><input id="url" type="url"></div><div class="field"><label for="memo">Memo</label><textarea id="memo"></textarea></div><div class="field"><label>Tags</label><div id="tags" class="tag-list"></div></div><div id="message" class="message"></div><div class="form-actions"><a class="button secondary" href="/materials.html">Cancel</a><button class="button primary" type="submit">Save Material</button></div></form></section></main><script th:src="@{/js/material-create.js}"></script></body></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Material</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container">
+    <header class="header"><h1>Create Material</h1><a class="button secondary" href="/materials.html">Back to List</a>
+    </header>
+    <section class="card">
+        <form id="form" class="form">
+            <div class="field"><label for="title">Title</label><input id="title" required></div>
+            <div class="field"><label for="url">Reference URL</label><input id="url" type="url"></div>
+            <div class="field"><label for="memo">Memo</label><textarea id="memo"></textarea></div>
+            <div class="field"><label>Tags</label>
+                <div id="tags" class="tag-list"></div>
+            </div>
+            <div id="message" class="message"></div>
+            <div class="form-actions"><a class="button secondary" href="/materials.html">Cancel</a>
+                <button class="button primary" type="submit">Save Material</button>
+            </div>
+        </form>
+    </section>
+</main>
+<template id="tagOptionTemplate"><label class="tag-option"><input type="checkbox"><span class="tag-name"></span></label>
+</template>
+<script th:src="@{/js/material-create.js}"></script>
+</body>
+</html>

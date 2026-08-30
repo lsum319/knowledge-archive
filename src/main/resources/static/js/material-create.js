@@ -1,7 +1,13 @@
 const tagContainer = document.getElementById('tags');
 const message = document.getElementById('message');
-const escapeHtml = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-fetch('/tag').then(response => response.json()).then(data => tagContainer.innerHTML = data.map(tag => `<label class="tag-option"><input type="checkbox" value="${tag.id}">${escapeHtml(tag.name)}</label>`).join('')).catch(() => tagContainer.textContent = 'Tags could not be loaded.');
+const tagOptionTemplate = document.getElementById('tagOptionTemplate');
+fetch('/tag').then(response => response.json()).then(data => tagContainer.replaceChildren(...data.map(tag => {
+    const option = tagOptionTemplate.content.cloneNode(true);
+    const input = option.querySelector('input');
+    input.value = tag.id;
+    option.querySelector('.tag-name').textContent = tag.name;
+    return option;
+}))).catch(() => tagContainer.textContent = 'Tags could not be loaded.');
 document.getElementById('form').addEventListener('submit', async event => {
     event.preventDefault();
     try {

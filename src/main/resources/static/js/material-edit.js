@@ -1,7 +1,7 @@
 const materialId = new URLSearchParams(location.search).get('id');
 const tagContainer = document.getElementById('tags');
 const message = document.getElementById('message');
-const escapeHtml = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+const tagOptionTemplate = document.getElementById('tagOptionTemplate');
 const request = async (path, options) => {
     const response = await fetch(path, {...options, credentials: 'same-origin'});
     const body = await response.text();
@@ -13,7 +13,14 @@ Promise.all([request(`/material/${encodeURIComponent(materialId)}`, {method: 'GE
     url.value = material.url || '';
     memo.value = material.memo || '';
     const selected = (material.tags || []).map(tag => tag.id);
-    tagContainer.innerHTML = tags.map(tag => `<label class="tag-option"><input type="checkbox" value="${tag.id}" ${selected.includes(tag.id) ? 'checked' : ''}>${escapeHtml(tag.name)}</label>`).join('')
+    tagContainer.replaceChildren(...tags.map(tag => {
+        const option = tagOptionTemplate.content.cloneNode(true);
+        const input = option.querySelector('input');
+        input.value = tag.id;
+        input.checked = selected.includes(tag.id);
+        option.querySelector('.tag-name').textContent = tag.name;
+        return option;
+    }))
 }).catch(() => message.textContent = 'Unable to load material.');
 document.getElementById('form').addEventListener('submit', async event => {
     event.preventDefault();

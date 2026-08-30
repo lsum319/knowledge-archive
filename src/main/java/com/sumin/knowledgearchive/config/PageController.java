@@ -9,6 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class PageController {
@@ -36,13 +38,24 @@ public class PageController {
     }
 
     @GetMapping({"/materials", "/materials.html"})
-    public String materials(Model model) {
-        model.addAttribute("materials", materialService.selectMaterials(null));
+    public String materials(
+            @RequestParam(name = "tag", required = false) String tag,
+            @RequestParam(name = "tags", required = false) List<String> tags,
+            Model model) {
+
+        if (tags != null && !tags.isEmpty()) {
+            model.addAttribute("materials", materialService.selectMaterialsByTag(tags));
+        } else if (tag != null && !tag.isBlank()) {
+            model.addAttribute("materials", materialService.selectMaterialsByTag(List.of(tag)));
+        } else {
+            model.addAttribute("materials", materialService.selectMaterials(null));
+        }
+
         return "materials";
     }
 
     @GetMapping({"/material-detail", "/material-detail.html"})
-    public String materialDetail(@RequestParam int id, Model model) {
+    public String materialDetail(@RequestParam("id") int id, Model model) {
         MaterialResponse material = materialService.selectMaterialById(id);
         model.addAttribute("material", material);
         model.addAttribute("tags", tagService.selectTags(null));

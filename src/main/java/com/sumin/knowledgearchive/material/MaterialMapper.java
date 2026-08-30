@@ -6,13 +6,22 @@ import java.util.List;
 
 @org.apache.ibatis.annotations.Mapper
 public interface MaterialMapper {
-    List<MaterialDomain> selectMaterials(int userId, String title);
+    List<MaterialDomain> selectMaterials(
+        @Param("userId") int userId,
+        @Param("title") String title
+    );
 
-    List<MaterialDomain> selectMaterialsByTag(int userId, List<String> tags);
+    List<MaterialDomain> selectMaterialsByTag(
+        @Param("userId") int userId,
+        @Param("tags") List<String> tags
+    );
 
     int insertMaterial(MaterialDomain domain);
 
-    MaterialDomain selectMaterialById(int userId, int id);
+    MaterialDomain selectMaterialById(
+        @Param("userId") int userId,
+        @Param("id") int id
+    );
 
     int updateMaterial(MaterialDomain domain);
 

@@ -20,14 +20,14 @@ public class MaterialController {
     // 제목으로 자료 검색
     @Operation(summary = "제목으로 자료 검색")
     @GetMapping(params = "title")
-    public List<MaterialResponse> selectMaterials(@RequestParam(required = false) String title){
+    public List<MaterialResponse> selectMaterials(@RequestParam(name = "title", required = false) String title){
         return materialService.selectMaterials(title);
     }
 
     // 태그로 자료 검색
     @Operation(summary = "태그로 자료 검색")
     @GetMapping(params = "tags")
-    public List<MaterialResponse> selectMaterialsByTag(@RequestParam(required = false) List<String> tags) {
+    public List<MaterialResponse> selectMaterialsByTag(@RequestParam(name = "tags", required = false) List<String> tags) {
         return materialService.selectMaterialsByTag(tags);
     }
 

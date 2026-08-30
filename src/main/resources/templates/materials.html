@@ -17,7 +17,7 @@
         </div>
     </header>
     <section class="panel">
-        <form id="searchForm" class="header">
+        <form id="searchForm" class="header search-row-with-reset">
             <div class="actions">
                 <fieldset class="search-options">
                     <legend>Search by</legend>
@@ -31,23 +31,38 @@
                     </label>
                 </fieldset>
                   <div class="search-input-wrap">
+                      <div id="selectedTagsContainer" class="selected-tags" aria-live="polite"></div>
                       <input id="searchKeyword" name="keyword" type="search"
-                          placeholder="Search material title or tag" autocomplete="off">
+                          placeholder="Search material title or tag (comma-separated)" autocomplete="off">
                       <div id="tagSuggestions" class="tag-suggestions" role="listbox" hidden></div>
                   </div>
                 <button class="button secondary" type="submit">Search</button>
+                <a class="button secondary small reset-button" href="/materials.html">Show All</a>
             </div>
         </form>
         <div id="materialList" class="list" th:hidden="${#lists.isEmpty(materials)}">
-            <article class="material" th:each="item : ${materials}"><h2><a
-                    th:href="@{/material-detail.html(id=${item.id})}" th:text="${item.title}">Title</a></h2>
+            <article class="material" th:each="item : ${materials}" th:attr="data-id=${item.id}" tabindex="0"><h2><span
+                    class="material-title" th:text="${item.title}">Title</span></h2>
                 <p><strong>Created:</strong> <span th:text="${item.createdAt}">Date</span></p>
                 <p th:text="${item.memo ?: 'No memo available.'}">Memo</p>
                 <p th:if="${item.url}"><strong>Link:</strong> <a class="url" th:href="${item.url}" th:text="${item.url}"
                                                                  target="_blank" rel="noopener noreferrer">URL</a></p>
-                <div class="tags"><span class="tag" th:each="tag : ${item.tags}" th:text="${tag.name}">Tag</span></div>
+                <div class="tags"><a class="tag" th:each="tag : ${item.tags}"
+                                     th:href="@{/materials.html(tags=${tag.name})}" th:text="${tag.name}">Tag</a></div>
             </article>
         </div>
+        <template id="materialTemplate">
+            <article class="material">
+                <h2><a class="material-title"></a></h2>
+                <p><strong>Created:</strong> <span class="material-created"></span></p>
+                <p class="material-memo"></p>
+                <p class="material-url-row"><strong>Link:</strong> <a class="url material-url" target="_blank" rel="noopener noreferrer"></a></p>
+                <div class="tags material-tags"></div>
+            </article>
+        </template>
+        <template id="tagSuggestionTemplate">
+            <button class="tag-suggestion" type="button" role="option"></button>
+        </template>
         <div id="emptyMessage" class="empty" th:hidden="${!#lists.isEmpty(materials)}">No materials registered.</div>
     </section>
 </main>

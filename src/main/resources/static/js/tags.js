@@ -1,6 +1,6 @@
 const tagList = document.getElementById('list');
 const message = document.getElementById('message');
-const escapeHtml = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+const tagRowTemplate = document.getElementById('tagRowTemplate');
 const request = async (path, options) => {
     const response = await fetch(path, {...options, credentials: 'same-origin'});
     const body = await response.text();
@@ -10,8 +10,26 @@ const request = async (path, options) => {
 
 async function load() {
     const tags = await request('/tag', {method: 'GET'});
-    tagList.innerHTML = tags.length ? tags.map(tag => `<div class="tag-row"><strong>${escapeHtml(tag.name)}</strong><div class="tag-actions"><button class="button secondary" onclick="editTag(${tag.id},'${escapeHtml(tag.name)}')">Edit</button><button class="button danger" onclick="deleteTag(${tag.id})">Delete</button></div></div>`).join('') : 'No tags registered.'
+    if (!tags.length) {
+        tagList.textContent = 'No tags registered.';
+        return;
+    }
+    tagList.replaceChildren(...tags.map(tag => {
+        const row = tagRowTemplate.content.cloneNode(true);
+        row.querySelector('.tag-name').textContent = tag.name;
+        row.querySelector('.edit-tag').dataset.id = tag.id;
+        row.querySelector('.edit-tag').dataset.name = tag.name;
+        row.querySelector('.delete-tag').dataset.id = tag.id;
+        return row;
+    }));
 }
+
+tagList.addEventListener('click', event => {
+    const editButton = event.target.closest('.edit-tag');
+    if (editButton) return editTag(editButton.dataset.id, editButton.dataset.name);
+    const deleteButton = event.target.closest('.delete-tag');
+    if (deleteButton) deleteTag(deleteButton.dataset.id);
+});
 
 document.getElementById('create').addEventListener('submit', async event => {
     event.preventDefault();

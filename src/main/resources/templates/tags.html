@@ -19,6 +19,15 @@
         <div id="list"></div>
     </section>
 </main>
+<template id="tagRowTemplate">
+    <div class="tag-row">
+        <strong class="tag-name"></strong>
+        <div class="tag-actions">
+            <button class="button secondary edit-tag" type="button">Edit</button>
+            <button class="button danger delete-tag" type="button">Delete</button>
+        </div>
+    </div>
+</template>
 <script th:src="@{/js/tags.js}"></script>
 </body>
 </html>

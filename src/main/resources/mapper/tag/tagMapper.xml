@@ -51,7 +51,7 @@
 
     <delete id="deleteMaterialTagByTagId" parameterType="int">
         DELETE
-        FROM "MATERIALTAG"
+        FROM "MATERIAL_TAG"
         WHERE tag_id = #{tagId}
     </delete>
 </mapper>

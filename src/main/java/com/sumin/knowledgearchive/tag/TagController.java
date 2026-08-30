@@ -20,14 +20,14 @@ public class TagController {
     // 태그 검색
     @Operation(summary = "태그 검색")
     @GetMapping
-    public List<TagResponse> selectTags(@RequestParam(required = false) String name){
+    public List<TagResponse> selectTags(@RequestParam(name = "name", required = false) String name){
         return tagService.selectTags(name);
     }
 
     // 개별 태그 검색
     @Operation(summary = "개별 태그 검색")
     @GetMapping("/{id}")
-    public TagResponse selectTagById(@PathVariable int id){
+    public TagResponse selectTagById(@PathVariable("id") int id){
         return tagService.selectTagById(id);
     }
 

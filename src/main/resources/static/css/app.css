@@ -292,6 +292,16 @@ h1 {
     gap: 8px
 }
 
+.input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center
+}
+
+.input-row input {
+    flex: 1
+}
+
 .field label, label {
     font-weight: 700
 }
@@ -345,8 +355,45 @@ textarea {
     font-weight: 700
 }
 
-.success {
+.message.success {
     color: var(--success)
+}
+
+.message.error {
+    color: var(--danger)
+}
+
+.hidden {
+    display: none !important
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, .45);
+    z-index: 1000
+}
+
+.modal-content {
+    width: min(420px, calc(100% - 32px));
+    padding: 28px 24px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, .12);
+    text-align: center
+}
+
+.modal-content h2 {
+    margin: 0 0 12px
+}
+
+.modal-content p {
+    margin: 0 0 20px;
+    color: var(--muted);
+    line-height: 1.6
 }
 
 .tag-list, .tags {

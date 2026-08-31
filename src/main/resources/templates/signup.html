@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Archive - Sign Up</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="card login-card">
+    <h1>Create Account</h1>
+    <p>Join Knowledge Archive to save and manage your knowledge.</p>
+
+    <form id="signupForm" class="form" novalidate>
+        <div class="field">
+            <label for="email">Email</label>
+            <div class="input-row">
+                <input id="email" name="email" type="email" placeholder="you@example.com" required>
+                <button id="checkEmailBtn" class="button secondary small" type="button">Check Duplicate</button>
+            </div>
+            <div id="emailCheckMessage" class="message" aria-live="polite"></div>
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" minlength="5" maxlength="15" required>
+        </div>
+
+        <div class="field">
+            <label for="confirmPassword">Confirm Password</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" minlength="5" maxlength="15" required>
+            <div id="passwordMessage" class="message" aria-live="polite"></div>
+        </div>
+
+        <div id="message" class="message" aria-live="polite"></div>
+
+        <button class="button primary" type="submit">Sign Up</button>
+        <button class="button secondary" type="button" onclick="location.href='/login.html'">Back to Login</button>
+    </form>
+</main>
+
+<div id="successModal" class="modal hidden" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content">
+        <h2>Sign Up Successful</h2>
+        <p>Your account has been created successfully.</p>
+        <button id="confirmSignupBtn" class="button primary" type="button">Confirm</button>
+    </div>
+</div>
+
+<script th:src="@{/js/signup.js}"></script>
+</body>
+</html>

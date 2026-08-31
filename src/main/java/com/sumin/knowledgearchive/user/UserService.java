@@ -19,21 +19,30 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+    // 전체 유저 조회
     public List<UserDomain> selectAllUser(){
         return userMapper.selectAllUser();
     }
 
+    // 기존 가입 유저 확인
+    public boolean existsByEmail(String email) {
+        return userMapper.selectUserByEmail(email) != null;
+    }
+
     //회원가입
-    public void insertUser(CreateUserRequest request){
+    public void register(CreateUserRequest request){
         // 기존에 가입된 이메일인지 체크
-        UserDomain userDomain = userMapper.selectUserByEmail(request.getEmail());
-        if (userDomain != null) {
+        if (existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException("이미 가입된 이메일입니다.");
         }
 
         //비밀번호 인코딩
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         userMapper.insertUser(request.toDomain());
+    }
+
+    public void insertUser(CreateUserRequest request){
+        register(request);
     }
 
     //로그인
@@ -49,7 +58,7 @@ public class UserService {
         }
 
         // 2. 비밀번호 일치 확인
-        if(!userDomain.getPassword().equals(request.getPassword())) {
+        if(!passwordEncoder.matches(request.getPassword(), userDomain.getPassword())) {
             throw new WrongPasswordException("비밀번호가 일치하지 않습니다.");
         }
 

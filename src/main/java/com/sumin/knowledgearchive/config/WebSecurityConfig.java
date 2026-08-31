@@ -48,7 +48,14 @@ public class WebSecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers(
                                 "/",
+                                "/login",
+                                "/login.html",
+                                "/signup",
+                                "/signup.html",
                                 "/user",
+                                "/user/email",
+                                "/user/check-email",
+                                "/user/signup",
                                 "/user/login",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"

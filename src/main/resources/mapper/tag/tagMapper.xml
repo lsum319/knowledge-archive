@@ -13,21 +13,27 @@
         ,updated_at
         FROM "TAG"
         <where>
+            USER_ID = #{userId}
             <if test="name != null and name != ''">
-                name LIKE '%' || #{name} || '%'
+                AND name LIKE '%' || #{name} || '%'
             </if>
         </where>
     </select>
 
     <insert id="insertTag" parameterType="com.sumin.knowledgearchive.tag.TagDomain">
         INSERT INTO "TAG"
-        (name) VALUES (#{name})
+        (name
+        ,user_id)
+        VALUES
+        (#{name}
+        ,#{userId})
     </insert>
 
     <select id="selectTagById" parameterType="int" resultType="com.sumin.knowledgearchive.tag.TagDomain">
         SELECT
         id
-        ,name
+        , name
+        , user_id
         , created_at
         , updated_at
         FROM "TAG"

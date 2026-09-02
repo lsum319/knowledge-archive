@@ -3,10 +3,8 @@ package com.sumin.knowledgearchive.material;
 import com.sumin.knowledgearchive.material.dto.CreateMaterialRequest;
 import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.material.dto.UpdateMaterialRequest;
-import com.sumin.knowledgearchive.security.CustomUserDetails;
+import com.sumin.knowledgearchive.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -18,11 +16,8 @@ public class MaterialService {
 
     // 제목으로 전체 자료 조회
     public List<MaterialResponse> selectMaterials(String title){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-        int userId = userDetails.getUserId();
-
+        // 로그인 세션에서 유저pk 정보 가져옴
+        int userId = SecurityUtils.getCurrentUserId();
         return materialMapper.selectMaterials(userId, title)
                 .stream()
                 .map(MaterialResponse::from)
@@ -31,11 +26,8 @@ public class MaterialService {
 
     // 태그로 전체 자료 조회
     public List<MaterialResponse> selectMaterialsByTag(List<String> tags){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-        int userId = userDetails.getUserId();
-
+        // 로그인 세션에서 유저pk 정보 가져옴
+        int userId = SecurityUtils.getCurrentUserId();
         return materialMapper.selectMaterialsByTag(userId, tags)
                 .stream()
                 .map(MaterialResponse::from)
@@ -44,12 +36,8 @@ public class MaterialService {
 
     // 개별 자료 조회
     public MaterialResponse selectMaterialById(int id){
-        // 로그인 세션에서 user_id 정보 가져옴
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-        int userId = userDetails.getUserId();
-
+        // 로그인 세션에서 유저pk 정보 가져옴
+        int userId = SecurityUtils.getCurrentUserId();
         MaterialDomain materialDomain = materialMapper.selectMaterialById(userId, id);
         return MaterialResponse.from(materialDomain);
     }
@@ -58,13 +46,6 @@ public class MaterialService {
     @Transactional
     public void insertMaterial(CreateMaterialRequest request) {
         MaterialDomain materialDomain = request.toDomain();
-
-        // 로그인 세션에서 user_id 정보 가져옴
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-        int userId = userDetails.getUserId();
-        materialDomain.setUserId(userId);
 
         //insert 후 pk가 materialDomain에 세팅
         materialMapper.insertMaterial(materialDomain);

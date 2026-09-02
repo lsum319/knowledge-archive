@@ -8,10 +8,10 @@ import java.util.List;
 @Mapper
 public interface TagMapper {
     //전체 태그 조회
-    List<TagDomain> selectTags(@Param("name") String name);
+    List<TagDomain> selectTags(@Param("userId") int userId, @Param("name") String name);
 
     //개별 태그 조회
-    TagDomain selectTagById(@Param("id") int id);
+    TagDomain selectTagById(@Param("userId") int userId, @Param("id") int id);
 
     //태그 생성
     int insertTag(TagDomain tagDomain);

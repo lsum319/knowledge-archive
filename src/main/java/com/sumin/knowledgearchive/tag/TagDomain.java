@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class TagDomain {
     private int id;
     private String name;
+    private int userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

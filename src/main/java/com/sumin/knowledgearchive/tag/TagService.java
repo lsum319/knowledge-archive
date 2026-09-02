@@ -1,6 +1,7 @@
 package com.sumin.knowledgearchive.tag;
 
 import com.sumin.knowledgearchive.material.MaterialMapper;
+import com.sumin.knowledgearchive.security.SecurityUtils;
 import com.sumin.knowledgearchive.tag.dto.CreateTagRequest;
 import com.sumin.knowledgearchive.tag.dto.TagResponse;
 import com.sumin.knowledgearchive.tag.dto.UpdateTagRequest;
@@ -18,7 +19,9 @@ public class TagService {
 
     // 전체 태그 조회
     public List<TagResponse> selectTags(String name){
-        return tagMapper.selectTags(name)
+        // 로그인 세션에서 유저pk 정보 가져옴
+        int userId = SecurityUtils.getCurrentUserId();
+        return tagMapper.selectTags(userId, name)
                 .stream()
                 .map(TagResponse::from)
                 .toList();
@@ -26,12 +29,17 @@ public class TagService {
 
     // 개별 태그 조회
     public TagResponse selectTagById(int id){
-        TagDomain domain = tagMapper.selectTagById(id);
+        // 로그인 세션에서 유저pk 정보 가져옴
+        int userId = SecurityUtils.getCurrentUserId();
+        TagDomain domain = tagMapper.selectTagById(userId, id);
         return TagResponse.from(domain);
     }
 
     // 태그 생성
     public int insertTag(CreateTagRequest tagRequest){
+        // 로그인 세션에서 유저pk 정보 가져옴
+        int userId = SecurityUtils.getCurrentUserId();
+        tagRequest.setUserId(userId);
         return tagMapper.insertTag(tagRequest.toDomain());
     }
 

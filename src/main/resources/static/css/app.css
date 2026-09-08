@@ -84,6 +84,26 @@ h1 {
     flex-wrap: wrap
 }
 
+.page-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--line)
+}
+
+.page-tab {
+    padding: 10px 14px;
+    color: var(--muted);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 3px solid transparent
+}
+
+.page-tab:hover, .page-tab:focus-visible, .page-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent)
+}
+
 .search-options {
     display: flex;
     align-items: center;
@@ -344,6 +364,18 @@ textarea {
     margin-bottom: 20px
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0
+}
+
 .create-form input {
     flex: 1;
     min-width: 0
@@ -451,6 +483,28 @@ textarea {
     overflow: hidden
 }
 
+.mindmap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: #fff
+}
+
+.mindmap h2 {
+    margin: 0 0 8px;
+    font-size: 1.2rem
+}
+
+.mindmap p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px
+}
+
 .material::after {
     content: "Open detail";
     position: absolute;
@@ -547,6 +601,19 @@ textarea {
     .search-option {
         flex: 1;
         justify-content: center
+    }
+
+    .create-form {
+        flex-direction: column
+    }
+
+    .mindmap {
+        align-items: flex-start;
+        flex-direction: column
+    }
+
+    .mindmap .button {
+        width: 100%
     }
 }
 

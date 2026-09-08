@@ -2,6 +2,7 @@ package com.sumin.knowledgearchive.page;
 
 import com.sumin.knowledgearchive.material.MaterialService;
 import com.sumin.knowledgearchive.material.dto.MaterialResponse;
+import com.sumin.knowledgearchive.mindmap.MindmapService;
 import com.sumin.knowledgearchive.tag.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import java.util.List;
 public class PageController {
     private final MaterialService materialService;
     private final TagService tagService;
+    private final MindmapService mindmapService;
 
     @GetMapping({"/login", "/login.html"})
     public String login() {
@@ -66,4 +68,11 @@ public class PageController {
         model.addAttribute("tags", tagService.selectTags(null));
         return "material-detail";
     }
+
+    @GetMapping({"/mindmaps", "/mindmaps.html"})
+    public String mindmaps(Model model) {
+        model.addAttribute("mindmaps", mindmapService.selectMindmap(null));
+        return "mindmaps";
+    }
+
 }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sumin.knowledgearchive.mindmap.MindmapMapper">
+    <select id="selectMindmap" resultType="com.sumin.knowledgearchive.mindmap.MindmapDomain">
+        SELECT
+            id
+        , "name"
+        , user_id
+        , created_at
+        , updated_at
+        FROM "MINDMAP"
+        WHERE user_id = #{userId}
+    <if test="name != null">
+        AND name = #{name}
+    </if>
+    </select>
+
+    <select id="selectMindmapById" parameterType="int">
+        SELECT
+            *
+        FROM
+        "MINDMAP"
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertMindmap" parameterType="com.sumin.knowledgearchive.mindmap.MindmapDomain">
+        INSERT INTO "MINDMAP"
+            ("name"
+            , user_id)
+        VALUES(
+            #{name}
+            ,#{userId}
+            )
+    </insert>
+
+    <delete id="deleteMindmap" parameterType="int">
+        DELETE FROM "MINDMAP"
+        WHERE id = #{id}
+    </delete>
+</mapper>

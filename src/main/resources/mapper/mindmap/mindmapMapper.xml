@@ -19,7 +19,7 @@
     </if>
     </select>
 
-    <select id="selectMindmapById" parameterType="int">
+    <select id="selectMindmapById" parameterType="int" resultType="com.sumin.knowledgearchive.mindmap.MindmapDomain">
         SELECT
             *
         FROM

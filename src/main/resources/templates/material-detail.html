@@ -6,7 +6,7 @@
     <title th:text="${material != null ? material.title + ' - Detail' : 'Material Detail'}">Material Detail</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body>
+<body th:attr="data-material-id=${material != null ? material.id : null}">
 <main class="container">
     <header class="header"><h1>Material Detail</h1>
         <div class="actions"><a class="button secondary" href="/materials.html">Back to List</a><a
@@ -38,6 +38,31 @@
     </section>
     <section class="panel" th:unless="${material != null}"><p>Material not found.</p></section>
 </main>
+<button class="relationship-toggle button primary" type="button" id="relationshipToggle" aria-controls="relationshipSidebar"
+        aria-expanded="false" th:if="${material != null}">Add child material</button>
+<aside class="relationship-sidebar" id="relationshipSidebar" aria-labelledby="relationshipTitle" aria-hidden="true">
+    <div class="relationship-sidebar-header">
+        <div><p class="eyebrow">Material graph</p><h2 id="relationshipTitle">Add child material</h2></div>
+        <button class="sidebar-close" type="button" id="relationshipClose" aria-label="Close">&times;</button>
+    </div>
+    <p class="sidebar-description">Choose a material to register as a child of this material.</p>
+    <div class="relationship-list" id="relationshipList" aria-live="polite"></div>
+    <p class="sidebar-empty" id="relationshipEmpty" hidden>No other materials found.</p>
+</aside>
+<div class="sidebar-backdrop" id="relationshipBackdrop" hidden></div>
+<dialog class="edge-dialog" id="edgeDialog">
+    <form method="dialog" id="edgeForm">
+        <p class="eyebrow">New relationship</p>
+        <h2>Connect material</h2>
+        <p class="edge-target" id="edgeTarget"></p>
+        <label for="edgeName">Relationship name</label>
+        <input id="edgeName" name="name" type="text" maxlength="100" placeholder="e.g. prerequisite" required>
+        <div class="form-actions">
+            <button class="button secondary" value="cancel" type="submit">Cancel</button>
+            <button class="button primary" id="connectEdgeButton" value="connect" type="submit">Connect</button>
+        </div>
+    </form>
+</dialog>
 <script th:src="@{/js/material-detail.js}"></script>
 </body>
 </html>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sumin.knowledgearchive.edge.EdgeMapper">
+    <insert id="insertEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
+        INSERT INTO "EDGE"
+            (
+            source_id
+            ,target_id
+            <if test="name != null">
+            ,name
+            </if>
+            )
+        VALUES
+            (
+            #{sourceId}
+            ,#{targetId}
+            <if test="name != null">
+            ,#{name}
+            </if>
+            )
+    </insert>
+
+    <delete id="deleteEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
+        DELETE FROM "EDGE"
+        WHERE source_id = #{sourceId}
+            AND target_id = #{targetId}
+    </delete>
+</mapper>

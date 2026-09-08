@@ -45,6 +45,8 @@ public class MaterialService {
     // 자료 생성
     @Transactional
     public void insertMaterial(CreateMaterialRequest request) {
+        int userId = SecurityUtils.getCurrentUserId();
+        request.setUserId(userId);
         MaterialDomain materialDomain = request.toDomain();
 
         //insert 후 pk가 materialDomain에 세팅

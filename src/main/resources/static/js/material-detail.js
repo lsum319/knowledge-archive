@@ -16,10 +16,18 @@ const relationshipList = document.getElementById('relationshipList');
 const relationshipEmpty = document.getElementById('relationshipEmpty');
 const edgeDialog = document.getElementById('edgeDialog');
 const edgeForm = document.getElementById('edgeForm');
+const cancelEdgeButton = document.getElementById('cancelEdgeButton');
 const edgeName = document.getElementById('edgeName');
 const edgeTarget = document.getElementById('edgeTarget');
 const materialId = document.body.dataset.materialId;
 let selectedMaterial;
+
+if (cancelEdgeButton) {
+    cancelEdgeButton.addEventListener('click', () => {
+        edgeDialog.close();
+        edgeName.value = '';
+    });
+}
 
 const closeSidebar = () => {
     relationshipSidebar.classList.remove('open');

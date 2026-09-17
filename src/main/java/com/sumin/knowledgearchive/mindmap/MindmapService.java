@@ -1,5 +1,6 @@
 package com.sumin.knowledgearchive.mindmap;
 
+import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.mindmap.dto.CreateMindmapRequest;
 import com.sumin.knowledgearchive.mindmap.dto.MindmapResponse;
 import com.sumin.knowledgearchive.security.SecurityUtils;
@@ -23,9 +24,11 @@ public class MindmapService {
                 .toList();
     }
 
-    public MindmapResponse selectMindmapById(int id){
-        MindmapDomain domain = mindmapMapper.selectMindmapById(id);
-        return MindmapResponse.from(domain);
+    public List<MaterialResponse> selectMindmapById(int id){
+        return mindmapMapper.selectMindmapById(id)
+                .stream()
+                .map(MaterialResponse::from)
+                .toList();
     }
 
     public void insertMindmap(CreateMindmapRequest request){

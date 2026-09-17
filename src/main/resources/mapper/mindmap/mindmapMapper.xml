@@ -19,12 +19,16 @@
     </if>
     </select>
 
-    <select id="selectMindmapById" parameterType="int" resultType="com.sumin.knowledgearchive.mindmap.MindmapDomain">
+    <select id="selectMindmapById" parameterType="int" resultType="com.sumin.knowledgearchive.material.MaterialDomain">
         SELECT
-            *
+            mim.mindmap_id
+            ,m.id
+            ,m.title
         FROM
-        "MINDMAP"
-        WHERE id = #{id}
+        "MATERIAL" m
+        JOIN "MINDMAP_MATERIAL" mim
+        ON m.id = mim.material_id
+        WHERE mim.mindmap_id = #{id}
     </select>
 
     <insert id="insertMindmap" parameterType="com.sumin.knowledgearchive.mindmap.MindmapDomain">

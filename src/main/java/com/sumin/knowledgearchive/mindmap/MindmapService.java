@@ -37,4 +37,13 @@ public class MindmapService {
     public void deleteMindmap(int id){
         mindmapMapper.deleteMindmap(id);
     }
+
+    // mindmap-material 작성/삭제
+    public void insertMindmapMaterial(int mindmapId, int materialId){
+        mindmapMapper.insertMindmapMaterial(mindmapId, materialId);
+    }
+
+    public void deleteMindmapMaterial(int id){
+        mindmapMapper.deleteMindmapMaterial(id);
+    }
 }

@@ -41,4 +41,22 @@
         DELETE FROM "MINDMAP"
         WHERE id = #{id}
     </delete>
+
+    <insert id="insertMindmapMaterial" parameterType="int">
+        INSERT "MINDMAP_MATERIAL"
+            (
+            mindmap_id
+            ,material_id
+            )
+        VALUES
+            (
+            #{mindmapId}
+            ,#{materialId}
+            )
+    </insert>
+
+    <delete id="deleteMindmapMaterial" parameterType="int">
+        DELETE FROM "MINDMAP_MATERIAL"
+        WHERE id = #{id}
+    </delete>
 </mapper>

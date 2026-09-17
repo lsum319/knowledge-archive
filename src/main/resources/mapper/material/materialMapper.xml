@@ -135,4 +135,22 @@
             FROM "MATERIAL"
         WHERE id = #{id}
     </delete>
+
+    <insert id="insertMaterialTag" parameterType="int">
+        INSERT INTO "MATERIAL_TAG"
+        (
+        material_id
+        ,tag_id
+        )
+        VALUES
+        (
+        #{materialId}
+        ,#{tagId}
+        )
+    </insert>
+
+    <delete id="deleteMaterialTag" parameterType="int">
+        DELETE FROM "MATERIAL_TAG"
+        WHERE material_id = #{materialId}
+    </delete>
 </mapper>

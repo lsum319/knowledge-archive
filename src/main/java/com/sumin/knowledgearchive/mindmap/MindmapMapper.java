@@ -31,6 +31,7 @@ public interface MindmapMapper {
     );
 
     int deleteMindmapMaterial(
-        @Param("id") int id
+        @Param("mindmapId") int mindmapId,
+        @Param("materialId") int materialId
     );
 }

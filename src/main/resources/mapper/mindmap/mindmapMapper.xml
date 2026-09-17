@@ -46,8 +46,8 @@
         WHERE id = #{id}
     </delete>
 
-    <insert id="insertMindmapMaterial" parameterType="int">
-        INSERT "MINDMAP_MATERIAL"
+    <insert id="insertMindmapMaterial">
+        INSERT INTO "MINDMAP_MATERIAL"
             (
             mindmap_id
             ,material_id
@@ -61,6 +61,7 @@
 
     <delete id="deleteMindmapMaterial" parameterType="int">
         DELETE FROM "MINDMAP_MATERIAL"
-        WHERE id = #{id}
+        WHERE mindmap_id = #{mindmapId}
+        AND material_id = #{materialId}
     </delete>
 </mapper>

@@ -46,7 +46,7 @@ public class MindmapService {
         mindmapMapper.insertMindmapMaterial(mindmapId, materialId);
     }
 
-    public void deleteMindmapMaterial(int id){
-        mindmapMapper.deleteMindmapMaterial(id);
+    public void deleteMindmapMaterial(int mindmapId, int materialId){
+        mindmapMapper.deleteMindmapMaterial(mindmapId, materialId);
     }
 }

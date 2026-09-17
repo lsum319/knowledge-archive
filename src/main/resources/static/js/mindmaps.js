@@ -16,6 +16,24 @@ const updateEmptyState = () => {
     emptyMessage.hidden = hasMindmaps;
 };
 
+const attachCardNavigation = card => {
+    const detailId = card.dataset.id || card.getAttribute('data-id');
+    if (!detailId) return;
+
+    const detailUrl = `/mindmap-detail.html?id=${encodeURIComponent(detailId)}`;
+    card.setAttribute('tabindex', '0');
+    card.addEventListener('click', event => {
+        if (event.target.closest('button')) return;
+        window.location.href = detailUrl;
+    });
+    card.addEventListener('keydown', event => {
+        if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('button')) {
+            event.preventDefault();
+            window.location.href = detailUrl;
+        }
+    });
+};
+
 const deleteMindmap = async event => {
     const card = event.currentTarget.closest('.mindmap');
     const id = card.dataset.id;
@@ -40,6 +58,7 @@ const renderMindmaps = mindmaps => {
         const item = template.content.cloneNode(true);
         const card = item.querySelector('.mindmap');
         card.dataset.id = mindmap.id;
+        attachCardNavigation(card);
         item.querySelector('.mindmap-name').textContent = mindmap.name;
         item.querySelector('.mindmap-created').textContent = mindmap.createdAt || '';
         item.querySelector('.delete-mindmap').addEventListener('click', deleteMindmap);
@@ -57,6 +76,8 @@ const loadMindmaps = async () => {
 document.querySelectorAll('.delete-mindmap').forEach(button => {
     button.addEventListener('click', deleteMindmap);
 });
+
+document.querySelectorAll('.mindmap').forEach(attachCardNavigation);
 
 form.addEventListener('submit', async event => {
     event.preventDefault();

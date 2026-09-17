@@ -75,4 +75,10 @@ public class PageController {
         return "mindmaps";
     }
 
+    @GetMapping({"/mindmap-detail", "/mindmap-detail.html"})
+    public String mindmapDetail(@RequestParam("id") int id, Model model) {
+        model.addAttribute("materials", mindmapService.selectMindmapById(id));
+        return "mindmap-detail";
+    }
+
 }

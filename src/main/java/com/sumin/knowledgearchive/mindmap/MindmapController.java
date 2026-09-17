@@ -29,6 +29,21 @@ public class MindmapController {
         return mindmapService.selectMindmapById(id);
     }
 
+    @Operation(summary = "마인드맵에 자료 추가")
+    @PostMapping("/{id}/{materialId}")
+    public void insertMindmapMaterial(@PathVariable("id") int mindmapId,
+                                      @PathVariable("materialId") int materialId){
+        mindmapService.insertMindmapMaterial(mindmapId, materialId);
+    }
+
+    // 마인드맵에 속한 자료 삭제
+    @Operation(summary = "마인드맵의 자료 삭제")
+    @DeleteMapping("/{mindmapId}/{materialId}")
+    public void deleteMindmapMaterial(@PathVariable("mindmapId") int mindmapId,
+                                      @PathVariable("materialId") int materialId){
+        mindmapService.deleteMindmapMaterial(mindmapId, materialId);
+    }
+
     // 마인드맵 생성
     @Operation(summary = "마인드맵 생성")
     @PostMapping
@@ -37,7 +52,7 @@ public class MindmapController {
     }
 
     // 마인드맵 삭제
-    @Operation(summary = "마인드맵 생성")
+    @Operation(summary = "마인드맵 삭제")
     @DeleteMapping("/{id}")
     public void deleteMaterial(@PathVariable("id") int id){
         mindmapService.deleteMindmap(id);

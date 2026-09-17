@@ -491,7 +491,16 @@ textarea {
     padding: 20px;
     border: 1px solid var(--line);
     border-radius: 18px;
-    background: #fff
+    background: #fff;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease
+}
+
+.mindmap:hover, .mindmap:focus-visible {
+    border-color: rgba(67, 56, 202, .25);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, .08);
+    transform: translateY(-2px);
+    outline: none
 }
 
 .mindmap h2 {
@@ -553,6 +562,14 @@ textarea {
     color: var(--muted);
     line-height: 1.6;
     word-break: break-word
+}
+
+.material-remove {
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+    padding: 8px 12px;
+    font-size: 12px
 }
 
 .url, .content a {

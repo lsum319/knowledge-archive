@@ -35,10 +35,10 @@
         </form>
         <div id="mindmapMessage" class="message" role="status" aria-live="polite"></div>
         <div id="materialList" class="list" th:hidden="${#lists.isEmpty(materials)}">
-            <article class="material" th:each="item : ${materials}" th:attr="data-id=${item.id}" tabindex="0">
-                <h2><a th:href="@{/material-detail.html(id=${item.id})}" th:text="${item.title}">Material title</a></h2>
+            <article class="material" th:each="item : ${materials}" th:attr="data-id=${item.materialId}" tabindex="0">
+                <h2><a th:href="@{/material-detail.html(id=${item.materialId})}" th:text="${item.title}">Material title</a></h2>
                 <p>Open material details</p>
-                <button class="button danger material-remove" type="button" th:attr="data-id=${item.id}">Remove</button>
+                <button class="button danger material-remove" type="button" th:attr="data-id=${item.materialId}">Remove</button>
             </article>
         </div>
         <div class="empty" th:hidden="${!#lists.isEmpty(materials)}">No materials in this mindmap.</div>

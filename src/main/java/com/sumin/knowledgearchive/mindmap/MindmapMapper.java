@@ -13,8 +13,14 @@ public interface MindmapMapper {
         @Param("name") String name
     );
 
-    List<MaterialDomain> selectMindmapById(
-            @Param("id") int id
+    // 테스트용 마인드맵 내 자료목록 조회용
+    List<MindmapMaterialDomain> selectMindmapById(
+            @Param("mindmapId") int mindmapId
+    );
+
+    // cytoscape를 위한 nodeData(material data, 좌표) 조회
+    List<MindmapMaterialDomain> selectNodeDataById(
+            @Param("mindmapId") int mindmapId
     );
 
     int insertMindmap(

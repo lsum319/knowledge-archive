@@ -22,13 +22,14 @@ public class MindmapController {
         return mindmapService.selectMindmap(name);
     }
 
-    // 마인드맵에 속한 자료 목록 조회
+    // (테스트용) 마인드맵에 속한 자료 목록 조회
     @Operation(summary = "마인드맵의 자료 목록 조회")
     @GetMapping("/{id}")
-    public List<MaterialResponse> selectMindmapById(@PathVariable("id") int id){
+    public List<MindmapMaterialDomain> selectMindmapById(@PathVariable("id") int id){
         return mindmapService.selectMindmapById(id);
     }
 
+    // 마인드맵에 자료 추가
     @Operation(summary = "마인드맵에 자료 추가")
     @PostMapping("/{id}/{materialId}")
     public void insertMindmapMaterial(@PathVariable("id") int mindmapId,

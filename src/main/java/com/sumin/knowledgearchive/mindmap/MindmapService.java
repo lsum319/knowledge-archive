@@ -24,10 +24,10 @@ public class MindmapService {
                 .toList();
     }
 
-    public List<MaterialResponse> selectMindmapById(int id){
+    // 테스트용
+    public List<MindmapMaterialDomain> selectMindmapById(int id){
         return mindmapMapper.selectMindmapById(id)
                 .stream()
-                .map(MaterialResponse::from)
                 .toList();
     }
 

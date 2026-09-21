@@ -19,16 +19,31 @@
     </if>
     </select>
 
-    <select id="selectMindmapById" parameterType="int" resultType="com.sumin.knowledgearchive.material.MaterialDomain">
+    <select id="selectMindmapById" parameterType="int" resultType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
         SELECT
-            mim.mindmap_id
+            mim.id
+            ,mim.mindmap_id
+            ,mim.material_id
+            ,m.title
+        FROM "MATERIAL" m
+        JOIN "MINDMAP_MATERIAL" mim
+        ON m.id = mim.material_id
+        WHERE mim.mindmap_id = #{mindmapId}
+    </select>
+
+    <select id="selectNodeDataById" parameterType="int" resultType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
+        SELECT
+            mim.id
+            ,mim.mindmap_id
             ,m.id
             ,m.title
+            ,mim.coord_x
+            ,mim.coord_y
         FROM
         "MATERIAL" m
         JOIN "MINDMAP_MATERIAL" mim
         ON m.id = mim.material_id
-        WHERE mim.mindmap_id = #{id}
+        WHERE mim.mindmap_id = #{mindmapId}
     </select>
 
     <insert id="insertMindmap" parameterType="com.sumin.knowledgearchive.mindmap.MindmapDomain">

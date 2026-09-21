@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class EdgeDomain {
+    private int id;
     private int sourceId;
     private int targetId;
     private String name;

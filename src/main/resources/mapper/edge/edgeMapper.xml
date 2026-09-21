@@ -5,6 +5,16 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.sumin.knowledgearchive.edge.EdgeMapper">
+    <select id="selectEdge" parameterType="int" resultType="com.sumin.knowledgearchive.edge.EdgeDomain">
+        SELECT
+            id
+            ,source_id
+            ,target_id
+            ,name
+        FROM "EDGE" e
+        WHERE mindmap_id = #{mindmapId}
+    </select>
+
     <insert id="insertEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
         INSERT INTO "EDGE"
             (

@@ -57,6 +57,7 @@ public class WebSecurityConfig {
                                 "/user/check-email",
                                 "/user/signup",
                                 "/user/login",
+                                "/cytomap/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()

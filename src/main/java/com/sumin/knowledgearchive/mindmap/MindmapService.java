@@ -1,6 +1,5 @@
 package com.sumin.knowledgearchive.mindmap;
 
-import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.mindmap.dto.CreateMindmapRequest;
 import com.sumin.knowledgearchive.mindmap.dto.MindmapResponse;
 import com.sumin.knowledgearchive.security.SecurityUtils;

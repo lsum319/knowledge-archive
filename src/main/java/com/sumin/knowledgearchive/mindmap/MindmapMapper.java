@@ -1,6 +1,5 @@
 package com.sumin.knowledgearchive.mindmap;
 
-import com.sumin.knowledgearchive.material.MaterialDomain;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

@@ -81,4 +81,10 @@ public class PageController {
         return "mindmap-detail";
     }
 
+    @GetMapping({"/cytoscape", "/cytoscape.html"})
+    public String cytoscape(@RequestParam("id") int id, Model model) {
+        model.addAttribute("mindmapId", id);
+        return "cytoscape";
+    }
+
 }

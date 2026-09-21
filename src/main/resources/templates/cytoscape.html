@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindmap Graph</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container wide">
+    <header class="header">
+        <div>
+            <p class="eyebrow">Mindmap visualization</p>
+            <h1>Knowledge Graph</h1>
+        </div>
+        <div class="actions">
+            <a class="button secondary" th:href="@{/mindmap-detail.html(id=${mindmapId})}">Back to Mindmap</a>
+            <a class="button secondary" href="/mindmaps.html">All Mindmaps</a>
+            <form action="/logout" method="post">
+                <button class="button danger" type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+    <section class="panel graph-panel">
+        <div class="graph-toolbar">
+            <p id="cytoscapeMessage" class="message" role="status" aria-live="polite">Loading graph...</p>
+            <button id="fitGraph" class="button secondary" type="button">Fit graph</button>
+        </div>
+        <div id="cy" class="cytoscape-graph" aria-label="Mindmap graph"></div>
+    </section>
+</body>
+<script th:inline="javascript">
+    window.mindmapId = /*[[${mindmapId}]]*/ 0;
+</script>
+<script src="https://unpkg.com/cytoscape@3.31.2/dist/cytoscape.min.js"></script>
+<script th:src="@{/js/cytoscape.js}"></script>
+</html>

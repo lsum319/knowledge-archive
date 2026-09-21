@@ -11,6 +11,7 @@
     <header class="header">
         <h1>Mindmap Materials</h1>
         <div class="actions">
+            <a class="button primary" th:href="@{/cytoscape.html(id=${param.id[0]})}">View Graph</a>
             <a class="button secondary" href="/mindmaps.html">Back to Mindmaps</a>
             <a class="button secondary" href="/materials.html">Materials</a>
             <form action="/logout" method="post">

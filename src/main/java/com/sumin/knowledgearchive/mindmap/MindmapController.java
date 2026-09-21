@@ -3,12 +3,14 @@ package com.sumin.knowledgearchive.mindmap;
 import com.sumin.knowledgearchive.mindmap.dto.CreateMindmapRequest;
 import com.sumin.knowledgearchive.mindmap.dto.MindmapResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/mindmap")
+@Tag(name = "Mindmap", description = "마인드맵 API")
+@RestController
 @RequestMapping("/mindmap")
 @RequiredArgsConstructor
 public class MindmapController {

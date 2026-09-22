@@ -35,7 +35,7 @@
         SELECT
             mim.id
             ,mim.mindmap_id
-            ,m.id
+            ,m.id as material_id
             ,m.title
             ,mim.coord_x
             ,mim.coord_y

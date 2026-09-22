@@ -5,12 +5,14 @@ import lombok.Data;
 
 @Data
 public class EdgeRequest {
+    private int mindmapId;
     private int sourceId;
     private int targetId;
     private String name;
 
     public EdgeDomain toDomain() {
         EdgeDomain edgeDomain = new EdgeDomain();
+        edgeDomain.setMindmapId(mindmapId);
         edgeDomain.setSourceId(sourceId);
         edgeDomain.setTargetId(targetId);
         edgeDomain.setName(name);

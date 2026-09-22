@@ -18,7 +18,8 @@
     <insert id="insertEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
         INSERT INTO "EDGE"
             (
-            source_id
+            mindmap_id
+            ,source_id
             ,target_id
             <if test="name != null">
             ,name
@@ -26,7 +27,8 @@
             )
         VALUES
             (
-            #{sourceId}
+            #{mindmapId}
+            ,#{sourceId}
             ,#{targetId}
             <if test="name != null">
             ,#{name}

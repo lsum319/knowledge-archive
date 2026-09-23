@@ -329,10 +329,53 @@ h1 {
 }
 
 .cytoscape-graph {
+    position: relative;
     min-height: 640px;
     border: 1px solid var(--line);
     border-radius: 16px;
     background: radial-gradient(circle at center, #ffffff, #f1f5f9)
+}
+
+.node-connect-button {
+    position: absolute;
+    z-index: 2;
+    transform: translate(-50%, -100%);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: var(--primary);
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(15, 23, 42, .18)
+}
+
+.node-connect-button:hover {
+    background: var(--accent)
+}
+
+.edge-delete-button {
+    position: absolute;
+    z-index: 2;
+    transform: translate(-50%, -100%);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: var(--danger);
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(15, 23, 42, .18)
+}
+
+.edge-delete-button:hover {
+    filter: brightness(.9)
 }
 
 .login-card {

@@ -1,5 +1,6 @@
 package com.sumin.knowledgearchive.mindmap;
 
+import com.sumin.knowledgearchive.mindmap.dto.MindmapMaterialRequest;
 import com.sumin.knowledgearchive.mindmap.dto.CreateMindmapRequest;
 import com.sumin.knowledgearchive.mindmap.dto.MindmapResponse;
 import com.sumin.knowledgearchive.security.SecurityUtils;
@@ -41,11 +42,12 @@ public class MindmapService {
     }
 
     // mindmap-material 작성/삭제
-    public void insertMindmapMaterial(int mindmapId, int materialId){
-        mindmapMapper.insertMindmapMaterial(mindmapId, materialId);
+    public void insertMindmapMaterial(MindmapMaterialRequest request){
+        mindmapMapper.insertMindmapMaterial(request.toDomain());
     }
 
-    public void deleteMindmapMaterial(int mindmapId, int materialId){
-        mindmapMapper.deleteMindmapMaterial(mindmapId, materialId);
+    public void deleteMindmapMaterial(int id){
+        mindmapMapper.deleteMindmapMaterial(id);
     }
+
 }

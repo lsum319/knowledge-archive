@@ -21,7 +21,7 @@
 
     <select id="selectMindmapById" parameterType="int" resultType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
         SELECT
-            mim.id
+            mim.id as id
             ,mim.mindmap_id
             ,mim.material_id
             ,m.title
@@ -33,7 +33,7 @@
 
     <select id="selectNodeDataById" parameterType="int" resultType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
         SELECT
-            mim.id
+            mim.id as id
             ,mim.mindmap_id
             ,m.id as material_id
             ,m.title
@@ -61,22 +61,41 @@
         WHERE id = #{id}
     </delete>
 
-    <insert id="insertMindmapMaterial">
+    <insert id="insertMindmapMaterial" parameterType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
         INSERT INTO "MINDMAP_MATERIAL"
             (
             mindmap_id
             ,material_id
+            ,coord_x
+            ,coord_y
             )
         VALUES
             (
             #{mindmapId}
             ,#{materialId}
-            )
+        <choose>
+            <when test="coordX != null and coordY != null">
+            ,#{coordX}
+            ,#{coordY}
+            </when>
+            <otherwise>
+            ,0
+            ,0
+            </otherwise>
+        </choose>
+        )
     </insert>
 
     <delete id="deleteMindmapMaterial" parameterType="int">
         DELETE FROM "MINDMAP_MATERIAL"
-        WHERE mindmap_id = #{mindmapId}
-        AND material_id = #{materialId}
+        WHERE id = #{id}
     </delete>
+
+    <update id="updateCoords" parameterType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
+        UPDATE "MINDMAP_MATERIAL"
+        SET
+            coord_x = #{coordX}
+            ,coord_y = #{coordY}
+        WHERE id = #{id}
+    </update>
 </mapper>

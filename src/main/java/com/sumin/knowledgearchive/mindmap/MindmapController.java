@@ -1,5 +1,6 @@
 package com.sumin.knowledgearchive.mindmap;
 
+import com.sumin.knowledgearchive.mindmap.dto.MindmapMaterialRequest;
 import com.sumin.knowledgearchive.mindmap.dto.CreateMindmapRequest;
 import com.sumin.knowledgearchive.mindmap.dto.MindmapResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,18 +33,16 @@ public class MindmapController {
 
     // 마인드맵에 자료 추가
     @Operation(summary = "마인드맵에 자료 추가")
-    @PostMapping("/{id}/{materialId}")
-    public void insertMindmapMaterial(@PathVariable("id") int mindmapId,
-                                      @PathVariable("materialId") int materialId){
-        mindmapService.insertMindmapMaterial(mindmapId, materialId);
+    @PostMapping("/{mindmapId}")
+    public void insertMindmapMaterial(@RequestBody MindmapMaterialRequest request){
+        mindmapService.insertMindmapMaterial(request);
     }
 
     // 마인드맵에 속한 자료 삭제
     @Operation(summary = "마인드맵의 자료 삭제")
-    @DeleteMapping("/{mindmapId}/{materialId}")
-    public void deleteMindmapMaterial(@PathVariable("mindmapId") int mindmapId,
-                                      @PathVariable("materialId") int materialId){
-        mindmapService.deleteMindmapMaterial(mindmapId, materialId);
+    @DeleteMapping("/material/{id}")
+    public void deleteMindmapMaterial(@PathVariable("id") int id){
+        mindmapService.deleteMindmapMaterial(id);
     }
 
     // 마인드맵 생성

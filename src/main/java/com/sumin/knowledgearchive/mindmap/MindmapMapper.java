@@ -30,13 +30,12 @@ public interface MindmapMapper {
         @Param("id") int id
     );
 
-    int insertMindmapMaterial(
-        @Param("mindmapId") int mindmapId,
-        @Param("materialId") int materialId
-    );
+    int insertMindmapMaterial(MindmapMaterialDomain mindmapMaterialDomain);
 
     int deleteMindmapMaterial(
-        @Param("mindmapId") int mindmapId,
-        @Param("materialId") int materialId
+            @Param("id") int id
     );
+    
+    // 좌표 정보 수정
+    int updateCoords(MindmapMaterialDomain mindmapMaterialDomain);
 }

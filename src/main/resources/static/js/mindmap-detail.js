@@ -11,7 +11,7 @@ const removeMaterial = async event => {
     const button = event.currentTarget;
     if (!confirm('Remove this material from the mindmap?')) return;
 
-    const response = await fetch(`/mindmap/${encodeURIComponent(mindmapId)}/${encodeURIComponent(button.dataset.id)}`, {
+    const response = await fetch(`/mindmap/material/${encodeURIComponent(button.dataset.id)}`, {
         method: 'DELETE',
         credentials: 'same-origin'
     });
@@ -36,9 +36,18 @@ const hideSuggestions = () => {
 };
 
 const addMaterial = async materialId => {
-    const response = await fetch(`/mindmap/${encodeURIComponent(mindmapId)}/${encodeURIComponent(materialId)}`, {
+    const response = await fetch(`/mindmap/${encodeURIComponent(mindmapId)}`, {
         method: 'POST',
-        credentials: 'same-origin'
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            mindmapId: Number(mindmapId),
+            materialId: Number(materialId),
+            coordX: 0,
+            coordY: 0
+        })
     });
     if (!response.ok) {
         setMessage('Failed to add material.');
@@ -81,17 +90,17 @@ const loadSuggestions = async () => {
 };
 
 const renderCurrentMaterials = materials => {
-    materialList.replaceChildren(...materials.map(material => {
+    materialList.replaceChildren(...materials.map(mindmapaMaterial => {
         const card = document.createElement('article');
         card.className = 'material';
-        card.dataset.id = material.id;
+        card.dataset.id = mindmapaMaterial.materialId;
         card.tabIndex = 0;
         card.innerHTML = '<h2><a></a></h2><p>Open material details</p><button class="button danger material-remove" type="button">Remove</button>';
         const link = card.querySelector('a');
-        link.href = `/material-detail.html?id=${encodeURIComponent(material.id)}`;
-        link.textContent = material.title;
+        link.href = `/material-detail.html?id=${encodeURIComponent(mindmapaMaterial.materialId)}`;
+        link.textContent = mindmapaMaterial.title;
         const removeButton = card.querySelector('.material-remove');
-        removeButton.dataset.id = material.id;
+        removeButton.dataset.id = mindmapaMaterial.id;
         removeButton.addEventListener('click', removeMaterial);
         card.addEventListener('click', event => {
             if (!event.target.closest('a, button')) window.location.href = link.href;

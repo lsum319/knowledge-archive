@@ -131,11 +131,9 @@ const loadGraph = async () => {
             }
         ],
         layout: {
-            name: 'cose',
-            animate: true,
-            padding: 40,
-            nodeRepulsion: 8000,
-            idealEdgeLength: 140
+            name: 'preset',
+            fit: true,
+            padding: 40
         }
     });
 
@@ -152,6 +150,24 @@ const loadGraph = async () => {
             x: (event.clientX - bounds.left - pan.x) / zoom,
             y: (event.clientY - bounds.top - pan.y) / zoom
         };
+    };
+
+    const updateNodeCoords = async node => {
+        const position = node.position();
+        const response = await fetch(`/cytomap/${encodeURIComponent(window.mindmapId)}`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: Number(node.data('id')),
+                coordX: position.x,
+                coordY: position.y
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to save node position.');
     };
 
     const moveConnectionPreview = event => {
@@ -282,6 +298,9 @@ const loadGraph = async () => {
     cy.on('mouseout', 'node', hideConnectButton);
     cy.on('mouseover', 'edge:not(.connection-preview)', event => showDeleteButton(event.target));
     cy.on('mouseout', 'edge:not(.connection-preview)', hideDeleteButton);
+    cy.on('dragfree', 'node', event => {
+        updateNodeCoords(event.target).catch(error => setMessage(error.message));
+    });
     cy.on('dbltap', 'node', startConnection);
     cy.on('tap', 'node', event => {
         if (!connectionPreviewNode) return;

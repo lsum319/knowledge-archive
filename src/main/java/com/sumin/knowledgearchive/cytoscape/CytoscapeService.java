@@ -27,6 +27,7 @@ public class CytoscapeService {
                                             // 개별 데이터 : mindmapMaterialId(pk), 제목
                                             new CytoscapeDto.NodeData(
                                                             String.valueOf(data.getId()),
+                                                            String.valueOf(data.getMaterialId()),
                                                             data.getTitle()),
                                             // 노드 좌표 세팅
                                             // 개별 좌표 : 출발노드 id, 도착노드 id

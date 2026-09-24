@@ -26,6 +26,7 @@ public class CytoscapeDto {
 
     public record NodeData(
         String id,       // ★ 주의: DB에선 Long/Int 여도 반드시 String으로!
+        String materialId,
         String title
 //        ,String content
     ) {}

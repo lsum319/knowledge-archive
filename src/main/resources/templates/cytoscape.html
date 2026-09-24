@@ -24,9 +24,46 @@
     <section class="panel graph-panel">
         <div class="graph-toolbar">
             <p id="cytoscapeMessage" class="message" role="status" aria-live="polite">Loading graph...</p>
-            <button id="fitGraph" class="button secondary" type="button">Fit graph</button>
+            <div class="graph-toolbar-actions">
+                <button id="fitGraph" class="button secondary" type="button">Fit graph</button>
+                <button id="toggleNodeSidebar" class="button secondary" type="button" aria-expanded="true" aria-controls="nodeSidebar">Hide details</button>
+            </div>
         </div>
-        <div id="cy" class="cytoscape-graph" aria-label="Mindmap graph"></div>
+        <div id="graphWorkspace" class="graph-workspace">
+            <div id="cy" class="cytoscape-graph" aria-label="Mindmap graph"></div>
+            <aside id="nodeSidebar" class="node-sidebar" aria-labelledby="nodeSidebarTitle">
+                <div class="node-sidebar-header">
+                    <div>
+                        <p class="eyebrow">Selected node</p>
+                        <h2 id="nodeSidebarTitle">Node details</h2>
+                    </div>
+                    <button id="closeNodeSidebar" class="icon-button" type="button" aria-label="Close node details">×</button>
+                </div>
+                <p id="nodeSidebarEmpty" class="sidebar-empty">Select a node to view and edit its details.</p>
+                <form id="nodeDetailsForm" class="node-details-form" hidden>
+                    <div class="field">
+                        <label for="nodeTitle">Title</label>
+                        <input id="nodeTitle" required>
+                    </div>
+                    <div class="field">
+                        <label for="nodeUrl">Reference URL</label>
+                        <input id="nodeUrl" type="url">
+                    </div>
+                    <div class="field">
+                        <label for="nodeMemo">Memo</label>
+                        <textarea id="nodeMemo"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Tags</label>
+                        <div id="nodeTags" class="tag-list"></div>
+                    </div>
+                    <p id="nodeDetailsMessage" class="message" role="status" aria-live="polite"></p>
+                    <div class="form-actions">
+                        <button class="button primary" type="submit">Save changes</button>
+                    </div>
+                </form>
+            </aside>
+        </div>
     </section>
 </body>
 <script th:inline="javascript">

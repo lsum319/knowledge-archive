@@ -1,10 +1,22 @@
 const message = document.getElementById('cytoscapeMessage');
 const graphContainer = document.getElementById('cy');
+const graphWorkspace = document.getElementById('graphWorkspace');
+const nodeSidebar = document.getElementById('nodeSidebar');
+const nodeSidebarEmpty = document.getElementById('nodeSidebarEmpty');
+const nodeDetailsForm = document.getElementById('nodeDetailsForm');
+const nodeDetailsMessage = document.getElementById('nodeDetailsMessage');
+const nodeTitleInput = document.getElementById('nodeTitle');
+const nodeUrlInput = document.getElementById('nodeUrl');
+const nodeMemoInput = document.getElementById('nodeMemo');
+const nodeTags = document.getElementById('nodeTags');
+const toggleNodeSidebar = document.getElementById('toggleNodeSidebar');
 const connectButton = document.createElement('button');
 const deleteButton = document.createElement('button');
 let hideConnectButtonTimer;
 let hideDeleteButtonTimer;
 let hoveredNode;
+let selectedNode;
+let availableTags = [];
 
 connectButton.type = 'button';
 connectButton.className = 'node-connect-button';
@@ -48,6 +60,16 @@ const showDeleteButton = edge => {
     deleteButton.edge = edge;
 };
 
+const updateDeleteButtonPosition = () => {
+    const edge = deleteButton.edge;
+    if (!edge || edge.removed()) return;
+
+    const sourcePosition = edge.source().renderedPosition();
+    const targetPosition = edge.target().renderedPosition();
+    deleteButton.style.left = `${(sourcePosition.x + targetPosition.x) / 2}px`;
+    deleteButton.style.top = `${(sourcePosition.y + targetPosition.y) / 2 - 18}px`;
+};
+
 const hideDeleteButton = () => {
     clearTimeout(hideDeleteButtonTimer);
     hideDeleteButtonTimer = setTimeout(() => {
@@ -66,6 +88,69 @@ const setMessage = (text, success = false) => {
     message.className = `message${success ? ' success' : ' error'}`;
 };
 
+const setDetailsMessage = (text, success = false) => {
+    nodeDetailsMessage.textContent = text;
+    nodeDetailsMessage.className = `message${success ? ' success' : ' error'}`;
+};
+
+const setSidebarOpen = isOpen => {
+    graphWorkspace.classList.toggle('sidebar-collapsed', !isOpen);
+    nodeSidebar.hidden = false;
+    toggleNodeSidebar.textContent = isOpen ? 'Hide details' : 'Show details';
+    toggleNodeSidebar.setAttribute('aria-expanded', String(isOpen));
+};
+
+const renderNodeTags = selectedTagIds => {
+    nodeTags.replaceChildren(...availableTags.map(tag => {
+        const label = document.createElement('label');
+        label.className = 'tag-option';
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = tag.id;
+        input.checked = selectedTagIds.includes(tag.id);
+
+        const name = document.createElement('span');
+        name.className = 'tag-name';
+        name.textContent = tag.name;
+        label.append(input, name);
+        return label;
+    }));
+};
+
+const loadNodeDetails = async node => {
+    selectedNode = node;
+    setSidebarOpen(true);
+    nodeSidebarEmpty.hidden = true;
+    nodeDetailsForm.hidden = false;
+    setDetailsMessage('Loading details...');
+
+    try {
+        const [materialResponse, tagsResponse] = await Promise.all([
+            fetch(`/material/${encodeURIComponent(node.data('materialId'))}`, {credentials: 'same-origin'}),
+            fetch('/tag', {credentials: 'same-origin'})
+        ]);
+        if (!materialResponse.ok || !tagsResponse.ok) throw new Error('Failed to load node details.');
+
+        const material = await materialResponse.json();
+        availableTags = await tagsResponse.json();
+        nodeTitleInput.value = material.title || '';
+        nodeUrlInput.value = material.url || '';
+        nodeMemoInput.value = material.memo || '';
+        renderNodeTags((material.tags || []).map(tag => tag.id));
+        setDetailsMessage('');
+    } catch (error) {
+        setDetailsMessage(error.message);
+    }
+};
+
+const clearNodeDetails = () => {
+    selectedNode = undefined;
+    nodeDetailsForm.hidden = true;
+    nodeSidebarEmpty.hidden = false;
+    setDetailsMessage('');
+};
+
 const loadGraph = async () => {
     const response = await fetch(`/cytomap/${encodeURIComponent(window.mindmapId)}`, {
         credentials: 'same-origin'
@@ -80,16 +165,28 @@ const loadGraph = async () => {
             {
                 selector: 'node',
                 style: {
-                    'background-color': '#4338ca',
+                    'background-color': '#0f766e',
+                    'border-width': 2,
+                    'border-color': '#115e59',
                     label: 'data(title)',
-                    color: '#111827',
+                    color: '#ffffff',
                     'text-wrap': 'wrap',
-                    'text-max-width': '140px',
-                    'text-valign': 'bottom',
-                    'text-margin-y': 8,
+                    'text-max-width': '74px',
+                    'text-valign': 'center',
+                    'text-halign': 'center',
                     'font-size': 13,
-                    width: 28,
-                    height: 28
+                    'font-weight': 700,
+                    width: 90,
+                    height: 90
+                }
+            },
+            {
+                selector: 'node:selected',
+                style: {
+                    'background-color': '#f59e0b',
+                    'border-color': '#b45309',
+                    'border-width': 4,
+                    color: '#422006'
                 }
             },
             {
@@ -128,6 +225,32 @@ const loadGraph = async () => {
                     'target-arrow-shape': 'triangle',
                     label: ''
                 }
+            },
+            {
+                selector: 'edge.edge-hover',
+                style: {
+                    width: 4,
+                    'line-color': '#f59e0b',
+                    'target-arrow-color': '#f59e0b',
+                    color: '#92400e'
+                }
+            },
+            {
+                selector: 'edge:selected',
+                style: {
+                    width: 5,
+                    'line-color': '#dc2626',
+                    'target-arrow-color': '#dc2626',
+                    color: '#991b1b'
+                }
+            },
+            {
+                selector: 'edge:selected.edge-hover',
+                style: {
+                    'line-color': '#f59e0b',
+                    'target-arrow-color': '#f59e0b',
+                    color: '#92400e'
+                }
             }
         ],
         layout: {
@@ -140,6 +263,7 @@ const loadGraph = async () => {
     let connectionPreviewNode;
     let connectionSourceNode;
     let lastPointerEvent;
+    let tapSelectionTimer;
 
     const getPointerPosition = event => {
         const bounds = graphContainer.getBoundingClientRect();
@@ -177,13 +301,14 @@ const loadGraph = async () => {
         connectionPreviewNode.position(getPointerPosition(event));
     };
 
-    const startConnection = () => {
-        if (!hoveredNode || connectionPreviewNode) return;
+    const startConnection = sourceNode => {
+        const node = sourceNode || hoveredNode;
+        if (!node || connectionPreviewNode) return;
 
-        connectionSourceNode = hoveredNode;
+        connectionSourceNode = node;
         const startPosition = lastPointerEvent
             ? getPointerPosition(lastPointerEvent)
-            : hoveredNode.position();
+            : node.position();
         connectionPreviewNode = cy.add({
             group: 'nodes',
             data: {
@@ -281,9 +406,66 @@ const loadGraph = async () => {
         }
     };
 
-    connectButton.addEventListener('click', startConnection);
+    const deleteNode = async node => {
+        const response = await fetch(`/mindmap/material/${encodeURIComponent(node.data('id'))}`, {
+            method: 'DELETE',
+            credentials: 'same-origin'
+        });
+        if (!response.ok) throw new Error('Failed to delete node.');
+
+        node.remove();
+    };
+
+    const deleteSelectedElements = async () => {
+        const selectedElements = cy.$(':selected').filter(element => !element.hasClass('connection-preview'));
+        if (!selectedElements.length) return;
+
+        try {
+            const selectedNodes = selectedElements.nodes();
+            const selectedEdges = selectedElements.edges().union(selectedNodes.connectedEdges());
+
+            for (const edge of selectedEdges) await deleteEdge(edge);
+            for (const node of selectedNodes) await deleteNode(node);
+
+            setMessage('Selected elements deleted.', true);
+        } catch (error) {
+            setMessage(error.message);
+        }
+    };
+
+    connectButton.addEventListener('click', () => startConnection());
     deleteButton.addEventListener('click', () => {
         if (deleteButton.edge) deleteEdge(deleteButton.edge);
+    });
+    toggleNodeSidebar.addEventListener('click', () => {
+        const isOpen = toggleNodeSidebar.getAttribute('aria-expanded') === 'true';
+        setSidebarOpen(!isOpen);
+    });
+    document.getElementById('closeNodeSidebar').addEventListener('click', () => setSidebarOpen(false));
+    nodeDetailsForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!selectedNode) return;
+
+        try {
+            const response = await fetch(`/material/${encodeURIComponent(selectedNode.data('materialId'))}`, {
+                method: 'PUT',
+                credentials: 'same-origin',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    title: nodeTitleInput.value.trim(),
+                    url: nodeUrlInput.value.trim(),
+                    memo: nodeMemoInput.value.trim(),
+                    tagIds: Array.from(nodeTags.querySelectorAll('input:checked')).map(input => Number(input.value))
+                })
+            });
+            if (!response.ok) throw new Error('Failed to update node details.');
+
+            selectedNode.data('title', nodeTitleInput.value.trim());
+            setDetailsMessage('Node details updated.', true);
+            setMessage('Node details updated.', true);
+        } catch (error) {
+            setDetailsMessage(error.message);
+        }
     });
     graphContainer.addEventListener('mousemove', moveConnectionPreview);
     graphContainer.addEventListener('contextmenu', event => {
@@ -292,25 +474,48 @@ const loadGraph = async () => {
     });
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') cancelConnection();
+        if (event.key === 'Delete') {
+            event.preventDefault();
+            deleteSelectedElements();
+        }
     });
 
     cy.on('mouseover', 'node', event => showConnectButton(event.target));
     cy.on('mouseout', 'node', hideConnectButton);
-    cy.on('mouseover', 'edge:not(.connection-preview)', event => showDeleteButton(event.target));
-    cy.on('mouseout', 'edge:not(.connection-preview)', hideDeleteButton);
+    cy.on('mouseover', 'edge:not(.connection-preview)', event => {
+        event.target.addClass('edge-hover');
+        showDeleteButton(event.target);
+    });
+    cy.on('mouseout', 'edge:not(.connection-preview)', event => {
+        event.target.removeClass('edge-hover');
+        hideDeleteButton();
+    });
+    cy.on('tap', 'node, edge', event => {
+        if (connectionPreviewNode && event.target.isNode()) {
+            const targetNode = event.target;
+            if (targetNode.id() !== connectionSourceNode.id()) completeConnection(targetNode);
+            return;
+        }
+
+        clearTimeout(tapSelectionTimer);
+        tapSelectionTimer = setTimeout(() => {
+            cy.elements().unselect();
+            event.target.select();
+            if (event.target.isNode()) loadNodeDetails(event.target);
+            else clearNodeDetails();
+        }, 220);
+    });
+    cy.on('pan zoom position', updateDeleteButtonPosition);
     cy.on('dragfree', 'node', event => {
         updateNodeCoords(event.target).catch(error => setMessage(error.message));
     });
-    cy.on('dbltap', 'node', startConnection);
-    cy.on('tap', 'node', event => {
-        if (!connectionPreviewNode) return;
-
-        const targetNode = event.target;
-        if (targetNode.id() === connectionSourceNode.id()) return;
-
-        completeConnection(targetNode);
+    cy.on('dbltap', 'node', event => {
+        clearTimeout(tapSelectionTimer);
+        cy.elements().unselect();
+        event.target.select();
+        loadNodeDetails(event.target);
+        startConnection(event.target);
     });
-
     document.getElementById('fitGraph').addEventListener('click', () => cy.fit(undefined, 40));
     setMessage(`${graph.elements.nodes.length} nodes, ${graph.elements.edges.length} connections`, true);
 };

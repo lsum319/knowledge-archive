@@ -298,6 +298,12 @@ h1 {
     border: 1px solid rgba(67, 56, 202, .12)
 }
 
+.quickLogin {
+    background-color: red;
+    color: var(--accent);
+    border: 3px solid yellow;
+}
+
 .danger {
     background: var(--danger);
     color: #fff
@@ -328,12 +334,102 @@ h1 {
     min-height: 0
 }
 
+.graph-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.graph-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 16px;
+    min-width: 0;
+    transition: grid-template-columns .25s ease
+}
+
+.graph-workspace.sidebar-collapsed {
+    grid-template-columns: minmax(0, 1fr) 0
+}
+
 .cytoscape-graph {
     position: relative;
     min-height: 640px;
     border: 1px solid var(--line);
     border-radius: 16px;
     background: radial-gradient(circle at center, #ffffff, #f1f5f9)
+}
+
+.node-sidebar {
+    min-width: 0;
+    overflow: hidden;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    transition: opacity .2s ease, padding .25s ease, border-width .25s ease
+}
+
+.sidebar-collapsed .node-sidebar {
+    padding-right: 0;
+    padding-left: 0;
+    border-width: 0;
+    opacity: 0
+}
+
+.node-sidebar-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px
+}
+
+.node-sidebar-header h2 {
+    margin: 0;
+    font-size: 1.35rem
+}
+
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer
+}
+
+.icon-button:hover, .icon-button:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent)
+}
+
+.sidebar-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6
+}
+
+.node-details-form {
+    display: grid;
+    gap: 16px
+}
+
+.node-details-form textarea {
+    min-height: 150px;
+    resize: vertical
+}
+
+.node-details-form .message {
+    min-height: 0;
+    margin: 0
 }
 
 .node-connect-button {
@@ -376,6 +472,12 @@ h1 {
 
 .edge-delete-button:hover {
     filter: brightness(.9)
+}
+
+.edge-delete-button:focus-visible,
+.node-connect-button:focus-visible {
+    outline: 3px solid rgba(245, 158, 11, .45);
+    outline-offset: 2px
 }
 
 .login-card {
@@ -916,5 +1018,35 @@ textarea {
 
     .create-form {
         flex-direction: column
+    }
+
+    .graph-toolbar {
+        align-items: flex-start;
+        flex-direction: column
+    }
+
+    .graph-toolbar-actions {
+        width: 100%
+    }
+
+    .graph-toolbar-actions .button {
+        flex: 1
+    }
+
+    .graph-workspace {
+        grid-template-columns: minmax(0, 1fr)
+    }
+
+    .graph-workspace.sidebar-collapsed {
+        grid-template-columns: minmax(0, 1fr)
+    }
+
+    .node-sidebar {
+        grid-row: 2;
+        max-height: 560px
+    }
+
+    .sidebar-collapsed .node-sidebar {
+        display: none
     }
 }

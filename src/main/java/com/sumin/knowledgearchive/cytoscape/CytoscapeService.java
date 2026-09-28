@@ -4,11 +4,14 @@ import com.sumin.knowledgearchive.cytoscape.dto.CoordUpdateRequest;
 import com.sumin.knowledgearchive.cytoscape.dto.CytoscapeDto;
 import com.sumin.knowledgearchive.edge.EdgeDomain;
 import com.sumin.knowledgearchive.edge.EdgeMapper;
+import com.sumin.knowledgearchive.material.MaterialService;
+import com.sumin.knowledgearchive.material.dto.CreateMaterialRequest;
 import com.sumin.knowledgearchive.mindmap.MindmapMapper;
 import com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +20,7 @@ import java.util.List;
 public class CytoscapeService {
     private final MindmapMapper mindmapMapper;
     private final EdgeMapper edgeMapper;
+    private final MaterialService materialService;
 
     public CytoscapeDto.CytoscapeResponse selectCytoscapeData(int mindmapId) {
             // node 세팅
@@ -56,6 +60,21 @@ public class CytoscapeService {
         domain.setCoordX(request.getCoordX());
         domain.setCoordY(request.getCoordY());
         mindmapMapper.updateCoords(domain);
+    }
+
+    // 신규 노드(Material) 생성
+    @Transactional 
+    public int createNodeAndMaterial(CreateMaterialRequest request, int mindmapId) {
+        // 1. Material 생성
+        int materialId = materialService.insertMaterial(request);
+
+        // 2. MindmapMaterial 생성
+        MindmapMaterialDomain domain = new MindmapMaterialDomain();
+        domain.setMindmapId(mindmapId);
+        domain.setMaterialId(materialId);
+        mindmapMapper.insertMindmapMaterial(domain);
+
+        return materialId;
     }
 
 }

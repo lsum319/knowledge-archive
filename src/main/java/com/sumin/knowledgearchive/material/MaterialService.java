@@ -43,8 +43,9 @@ public class MaterialService {
     }
 
     // 자료 생성
+    // 다른 api에서 materialService.insertMaterial() 호출하여 사용
     @Transactional
-    public void insertMaterial(CreateMaterialRequest request) {
+    public int insertMaterial(CreateMaterialRequest request) {
         int userId = SecurityUtils.getCurrentUserId();
         request.setUserId(userId);
         MaterialDomain materialDomain = request.toDomain();
@@ -54,6 +55,8 @@ public class MaterialService {
 
         // 자료 태그 생성
         insertMaterialTag(materialDomain.getId(), request.getTagIds());
+
+        return materialDomain.getId();
     }
 
     // 자료 수정

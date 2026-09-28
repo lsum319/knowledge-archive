@@ -26,6 +26,7 @@
             <p id="cytoscapeMessage" class="message" role="status" aria-live="polite">Loading graph...</p>
             <div class="graph-toolbar-actions">
                 <button id="fitGraph" class="button secondary" type="button">Fit graph</button>
+                <button id="createNodeButton" class="button primary" type="button">New node</button>
                 <button id="toggleNodeSidebar" class="button secondary" type="button" aria-expanded="true" aria-controls="nodeSidebar">Hide details</button>
             </div>
         </div>
@@ -65,6 +66,28 @@
             </aside>
         </div>
     </section>
+    <dialog id="createNodeDialog" class="edge-dialog" aria-labelledby="createNodeDialogTitle">
+        <h2 id="createNodeDialogTitle">Create node</h2>
+        <form id="createNodeForm">
+            <div class="field">
+                <label for="newNodeTitle">Title</label>
+                <input id="newNodeTitle" required>
+            </div>
+            <div class="field">
+                <label for="newNodeUrl">Reference URL</label>
+                <input id="newNodeUrl" type="url">
+            </div>
+            <div class="field">
+                <label for="newNodeMemo">Memo</label>
+                <textarea id="newNodeMemo"></textarea>
+            </div>
+            <p id="createNodeMessage" class="message" role="status" aria-live="polite"></p>
+            <div class="form-actions">
+                <button id="cancelCreateNode" class="button secondary" type="button">Cancel</button>
+                <button class="button primary" type="submit">Create node</button>
+            </div>
+        </form>
+    </dialog>
 </body>
 <script th:inline="javascript">
     window.mindmapId = /*[[${mindmapId}]]*/ 0;

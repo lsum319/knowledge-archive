@@ -4,6 +4,12 @@ const graphWorkspace = document.getElementById('graphWorkspace');
 const nodeSidebar = document.getElementById('nodeSidebar');
 const nodeSidebarEmpty = document.getElementById('nodeSidebarEmpty');
 const nodeDetailsForm = document.getElementById('nodeDetailsForm');
+const createNodeDialog = document.getElementById('createNodeDialog');
+const createNodeForm = document.getElementById('createNodeForm');
+const createNodeMessage = document.getElementById('createNodeMessage');
+const newNodeTitleInput = document.getElementById('newNodeTitle');
+const newNodeUrlInput = document.getElementById('newNodeUrl');
+const newNodeMemoInput = document.getElementById('newNodeMemo');
 const nodeDetailsMessage = document.getElementById('nodeDetailsMessage');
 const nodeTitleInput = document.getElementById('nodeTitle');
 const nodeUrlInput = document.getElementById('nodeUrl');
@@ -93,6 +99,11 @@ const setDetailsMessage = (text, success = false) => {
     nodeDetailsMessage.className = `message${success ? ' success' : ' error'}`;
 };
 
+const setCreateNodeMessage = (text, success = false) => {
+    createNodeMessage.textContent = text;
+    createNodeMessage.className = `message${success ? ' success' : ' error'}`;
+};
+
 const setSidebarOpen = isOpen => {
     graphWorkspace.classList.toggle('sidebar-collapsed', !isOpen);
     nodeSidebar.hidden = false;
@@ -149,6 +160,20 @@ const clearNodeDetails = () => {
     nodeDetailsForm.hidden = true;
     nodeSidebarEmpty.hidden = false;
     setDetailsMessage('');
+    setSidebarOpen(false);
+};
+
+const showCreateNodeForm = () => {
+    createNodeForm.hidden = false;
+    setCreateNodeMessage('');
+    createNodeDialog.showModal();
+    newNodeTitleInput.focus();
+};
+
+const hideCreateNodeForm = () => {
+    if (createNodeDialog.open) createNodeDialog.close();
+    createNodeForm.reset();
+    setCreateNodeMessage('');
 };
 
 const loadGraph = async () => {
@@ -161,6 +186,10 @@ const loadGraph = async () => {
     const cy = cytoscape({
         container: graphContainer,
         elements: graph.elements,
+        wheelSensitivity: 0.2,
+        boxSelectionEnabled: true,
+        userPanningEnabled: false,
+        selectionType: 'single',
         style: [
             {
                 selector: 'node',
@@ -442,6 +471,39 @@ const loadGraph = async () => {
         setSidebarOpen(!isOpen);
     });
     document.getElementById('closeNodeSidebar').addEventListener('click', () => setSidebarOpen(false));
+    document.getElementById('createNodeButton').addEventListener('click', showCreateNodeForm);
+    document.getElementById('cancelCreateNode').addEventListener('click', hideCreateNodeForm);
+    createNodeDialog.addEventListener('click', event => {
+        if (event.target === createNodeDialog) hideCreateNodeForm();
+    });
+    createNodeDialog.addEventListener('close', () => {
+        createNodeForm.hidden = true;
+        createNodeForm.reset();
+        setCreateNodeMessage('');
+    });
+    createNodeForm.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        try {
+            const response = await fetch(`/cytomap/node/${encodeURIComponent(window.mindmapId)}`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    title: newNodeTitleInput.value.trim(),
+                    url: newNodeUrlInput.value.trim(),
+                    memo: newNodeMemoInput.value.trim(),
+                    tagIds: []
+                })
+            });
+            if (!response.ok) throw new Error('Failed to create node.');
+
+            setCreateNodeMessage('Node created.', true);
+            window.location.reload();
+        } catch (error) {
+            setCreateNodeMessage(error.message);
+        }
+    });
     nodeDetailsForm.addEventListener('submit', async event => {
         event.preventDefault();
         if (!selectedNode) return;
@@ -468,6 +530,28 @@ const loadGraph = async () => {
         }
     });
     graphContainer.addEventListener('mousemove', moveConnectionPreview);
+    graphContainer.addEventListener('wheel', event => {
+        event.preventDefault();
+
+        const bounds = graphContainer.getBoundingClientRect();
+        const deltaY = event.deltaMode === 1
+            ? event.deltaY * 16
+            : event.deltaMode === 2
+                ? event.deltaY * 100
+                : event.deltaY;
+        const level = Math.min(
+            cy.maxZoom(),
+            Math.max(cy.minZoom(), cy.zoom() * Math.pow(1.0015, -deltaY))
+        );
+
+        cy.zoom({
+            level,
+            renderedPosition: {
+                x: event.clientX - bounds.left,
+                y: event.clientY - bounds.top
+            }
+        });
+    }, {passive: false});
     graphContainer.addEventListener('contextmenu', event => {
         event.preventDefault();
         cancelConnection();
@@ -490,6 +574,25 @@ const loadGraph = async () => {
         event.target.removeClass('edge-hover');
         hideDeleteButton();
     });
+    let backgroundPanPosition;
+    cy.on('cxttapstart', event => {
+        backgroundPanPosition = event.target === cy ? event.renderedPosition : undefined;
+    });
+    cy.on('cxtdrag', event => {
+        if (!backgroundPanPosition) return;
+
+        const position = event.renderedPosition;
+        const pan = cy.pan();
+        cy.pan({
+            x: pan.x + position.x - backgroundPanPosition.x,
+            y: pan.y + position.y - backgroundPanPosition.y
+        });
+        backgroundPanPosition = position;
+    });
+    cy.on('cxttapend', () => {
+        backgroundPanPosition = undefined;
+    });
+    cy.on('cxttap', 'node', event => loadNodeDetails(event.target));
     cy.on('tap', 'node, edge', event => {
         if (connectionPreviewNode && event.target.isNode()) {
             const targetNode = event.target;
@@ -501,8 +604,8 @@ const loadGraph = async () => {
         tapSelectionTimer = setTimeout(() => {
             cy.elements().unselect();
             event.target.select();
-            if (event.target.isNode()) loadNodeDetails(event.target);
-            else clearNodeDetails();
+            hideCreateNodeForm();
+            clearNodeDetails();
         }, 220);
     });
     cy.on('pan zoom position', updateDeleteButtonPosition);
@@ -513,10 +616,10 @@ const loadGraph = async () => {
         clearTimeout(tapSelectionTimer);
         cy.elements().unselect();
         event.target.select();
-        loadNodeDetails(event.target);
         startConnection(event.target);
     });
     document.getElementById('fitGraph').addEventListener('click', () => cy.fit(undefined, 40));
+    setSidebarOpen(false);
     setMessage(`${graph.elements.nodes.length} nodes, ${graph.elements.edges.length} connections`, true);
 };
 

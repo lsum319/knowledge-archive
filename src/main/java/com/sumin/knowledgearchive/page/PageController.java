@@ -83,7 +83,13 @@ public class PageController {
 
     @GetMapping({"/cytoscape", "/cytoscape.html"})
     public String cytoscape(@RequestParam("id") int id, Model model) {
+        String mindmapTitle = mindmapService.selectMindmap(null).stream()
+                .filter(mindmap -> mindmap.getId() == id)
+                .map(mindmap -> mindmap.getName())
+                .findFirst()
+                .orElse("");
         model.addAttribute("mindmapId", id);
+        model.addAttribute("mindmapTitle", mindmapTitle);
         return "cytoscape";
     }
 

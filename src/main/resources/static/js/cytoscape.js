@@ -183,6 +183,15 @@ const loadGraph = async () => {
     if (!response.ok) throw new Error('Failed to load graph data.');
 
     const graph = await response.json();
+    const nodeCount = graph.elements.nodes.length;
+    graph.elements.nodes.push({
+        data: {id: 'mindmap-title', title: window.mindmapTitle},
+        position: {x: 0, y: 0},
+        classes: 'mindmap-title',
+        locked: true,
+        selectable: false,
+        grabbable: false
+    });
     const cy = cytoscape({
         container: graphContainer,
         elements: graph.elements,
@@ -207,6 +216,23 @@ const loadGraph = async () => {
                     'font-weight': 700,
                     width: 90,
                     height: 90
+                }
+            },
+            {
+                selector: 'node.mindmap-title',
+                style: {
+                    shape: 'ellipse',
+                    width: 220,
+                    height: 140,
+                    'background-color': '#ffffff',
+                    'background-opacity': 0.9,
+                    'border-width': 3,
+                    'border-color': '#f59e0b',
+                    'z-index': -1,
+                    color: '#0f172a',
+                    'font-size': 20,
+                    'text-max-width': '190px',
+                    events: 'no'
                 }
             },
             {
@@ -620,7 +646,7 @@ const loadGraph = async () => {
     });
     document.getElementById('fitGraph').addEventListener('click', () => cy.fit(undefined, 40));
     setSidebarOpen(false);
-    setMessage(`${graph.elements.nodes.length} nodes, ${graph.elements.edges.length} connections`, true);
+    setMessage(`${nodeCount} nodes, ${graph.elements.edges.length} connections`, true);
 };
 
 loadGraph().catch(error => {

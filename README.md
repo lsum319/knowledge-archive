@@ -1,166 +1,160 @@
-````markdown
 # Knowledge Archive
 
-학습한 지식과 참고 자료를 한곳에 저장하고, 제목 검색과 태그로 다시 찾을 수 있도록 만든 개인 지식 관리 서비스입니다.
+> **자료를 저장하고 태그로 관리하며, 자료 간 관계를 마인드맵으로 시각화하는 개인 지식 관리 서비스**
 
-Spring Boot 기반 REST API와 Thymeleaf 화면을 함께 제공하며, 사용자 인증부터 자료와 태그 관리까지 하나의 애플리케이션으로 구성했습니다.
+Knowledge Archive는 학습 및 업무 중 수집한 자료를 관리하고, 자료 간의 관계를 마인드맵으로 구성할 수 있도록 만든 개인 프로젝트입니다.
+
+기본적인 자료 CRUD에서 시작해 **사용자 인증·접근 제어 → 태그 및 검색 → 자료 관계 관리 → Cytoscape.js 기반 마인드맵**으로 기능을 확장했습니다.
+
+---
 
 ## 주요 기능
 
-### 사용자
+### 자료 관리
+- 자료 등록 / 조회 / 수정 / 삭제
+- 제목 및 태그 기반 검색
+- 자료별 작성자 관리
+- 여러 태그 연결
 
-- **회원가입**: 이메일, 비밀번호 등 요청값을 검증한 뒤 사용자를 등록합니다.
-- **이메일 중복 확인**: 가입 전에 동일한 이메일로 등록된 사용자가 있는지 확인합니다.
-- **안전한 비밀번호 저장**: 원문 비밀번호를 저장하지 않고 BCrypt로 암호화합니다.
-- **이메일 기반 로그인**: Spring Security form login을 통해 로그인 요청을 처리합니다.
-- **인증 사용자별 데이터 접근**: 로그인 세션의 사용자 식별자를 기준으로 자료를 조회합니다.
+### 사용자 인증
+- 회원가입 및 이메일 중복 검증
+- 비밀번호 유효성 검증 및 BCrypt 암호화
+- Spring Security 기반 로그인
+- 로그인 사용자 기준 자료 접근 제어
 
-### 자료
+### 태그 관리
+- 태그 생성 / 조회 / 수정 / 삭제
+- Material - Tag 다대다 관계 관리
+- 태그 삭제 시 연결 관계 정리
 
-- **자료 등록**: 제목, 메모, URL과 태그를 함께 저장할 수 있습니다.
-- **자료 목록 조회**: 로그인한 사용자의 자료만 목록으로 조회합니다.
-- **자료 상세 조회**: 자료의 상세 내용과 연결된 정보를 확인합니다.
-- **자료 수정**: 자료 내용을 수정하고 연결된 태그 관계를 최신 상태로 동기화합니다.
-- **자료 삭제**: 자료와 연결된 태그 관계를 함께 정리한 뒤 자료를 삭제합니다.
-- **제목 검색**: 제목 조건으로 필요한 자료를 빠르게 검색합니다.
-- **태그 검색**: 하나 이상의 태그 조건을 사용해 관련 자료를 조회합니다.
+### 마인드맵
+- 마인드맵별 자료 추가 / 삭제
+- 자료를 노드로 시각화
+- 노드 위치 좌표 저장 및 변경
+- 자료 간 Edge 생성 / 삭제
+- Edge의 source / target 관계 관리
+- 마인드맵 내 자료 상세 수정
 
-### 태그
+### Cytoscape.js
+- Cytoscape.js 기반 그래프 UI
+- 노드 생성 및 드래그
+- 마우스 휠 감도 조정
+- 우클릭 드래그를 통한 화면 이동
 
-- **태그 생성**: 자료를 분류하기 위한 태그를 등록합니다.
-- **태그 목록 및 상세 조회**: 등록된 태그를 전체 또는 개별 단위로 조회합니다.
-- **태그 수정 및 삭제**: 태그 이름을 변경하거나 불필요한 태그를 삭제합니다.
-- **자료 연결 관리**: 연결 테이블을 통해 하나의 자료에 여러 태그를 연결하고, 하나의 태그를 여러 자료에서 사용할 수 있습니다.
-
-### 공통
-
-- **일관된 API 응답**: 공통 응답 객체를 사용해 API 응답 형식을 관리합니다.
-- **입력값 검증**: Bean Validation과 `@Valid`를 이용해 잘못된 요청을 차단합니다.
-- **예외 응답 표준화**: `@RestControllerAdvice`로 검증 실패, 중복 이메일, 사용자 조회 실패, 잘못된 비밀번호를 처리합니다.
-- **API 문서화**: Swagger / OpenAPI를 통해 엔드포인트를 확인하고 테스트할 수 있습니다.
+---
 
 ## 기술 스택
 
 | 구분 | 기술 |
-| --- | --- |
-| Language | Java 17 |
-| Framework | Spring Boot 3.5.16 |
-| Security | Spring Security 6, BCrypt |
-| Persistence | MyBatis 3.0.5 |
+|---|---|
+| Backend | Java, Spring Boot |
+| Security | Spring Security |
 | Database | PostgreSQL |
-| View | Thymeleaf |
-| API Docs | Springdoc OpenAPI 2.8.16 |
-| Build | Gradle |
+| Data Access | MyBatis |
+| API Documentation | Swagger / OpenAPI |
+| Frontend | HTML, CSS, JavaScript |
+| Graph | Cytoscape.js |
 
-## 기술적 요소
+---
 
-### 계층형 구조와 도메인 분리
-
-사용자, 자료, 태그를 각각 독립적인 도메인으로 나누고 Controller, Service, Mapper, DTO, Domain의 역할을 분리했습니다.
-요청과 응답은 DTO로 관리하고, 비즈니스 로직은 Service 계층에 두어 API 진입점과 데이터 접근 로직의 결합도를 낮췄습니다.
-
-### MyBatis 기반 SQL 제어
-
-MyBatis Mapper 인터페이스와 XML Mapper를 조합해 SQL을 직접 관리합니다.
-`map-underscore-to-camel-case` 설정으로 데이터베이스의 snake_case 컬럼과 Java의 camelCase 필드를 매핑하며, 조회 조건에 따른 SQL을 명시적으로 관리할 수 있습니다.
-
-### 트랜잭션을 통한 관계 데이터 일관성
-
-자료를 생성하거나 수정할 때 자료 본문과 `material_tag` 관계 데이터를 하나의 작업 단위로 처리합니다.
-수정 시 기존 태그 관계를 삭제한 뒤 새 관계를 저장하고, 삭제 시에도 연결 관계를 먼저 정리해 참조 데이터가 남지 않도록 구성했습니다.
-
-### 사용자 인증과 보안
-
-Spring Security의 인증 흐름과 접근 제어를 사용합니다.
-비밀번호는 `PasswordEncoder`로 BCrypt 해시 처리하며, 인증이 필요한 리소스에는 로그인 사용자만 접근할 수 있도록 설정했습니다.
-JWT 서명 키와 만료 시간 설정을 주입받는 토큰 제공자도 구성되어 있어 인증 확장에 필요한 기반을 마련했습니다.
-
-### 전역 예외 처리와 검증
-
-`@RestControllerAdvice`에서 예외를 한곳에서 처리하고, 예외 유형에 따라 적절한 HTTP 상태 코드와 오류 메시지를 반환합니다.
-Controller의 요청 검증과 Service의 비즈니스 예외를 분리해 정상 흐름과 오류 흐름을 명확하게 유지합니다.
-
-### 서버 렌더링과 REST API의 결합
-
-Thymeleaf 템플릿으로 로그인, 회원가입, 자료, 태그 관리 화면을 제공하면서 같은 Spring Boot 애플리케이션에서 REST API도 제공합니다.
-화면 라우팅은 `page` 패키지로 분리해 도메인 API Controller와 책임을 구분했습니다.
-
-## 프로젝트 구조
+## 핵심 데이터 구조
 
 ```text
-src/main/java/com/sumin/knowledgearchive
-├── common       # 공통 응답 및 예외 처리
-├── config       # Spring 및 Swagger 설정
-├── material     # 자료 도메인과 API
-├── page         # Thymeleaf 화면 라우팅
-├── security     # 인증 및 보안 처리
-├── tag          # 태그 도메인과 API
-└── user         # 사용자 도메인과 API
-
-src/main/resources
-├── mapper       # MyBatis XML Mapper
-├── static       # CSS 및 JavaScript
-└── templates    # Thymeleaf 템플릿
+USER
+ │
+ ├── MATERIAL
+ │      │
+ │      └── MATERIAL_TAG ── TAG
+ │
+ └── MINDMAP
+        │
+        ├── MINDMAP_MATERIAL ── MATERIAL
+        │       └── coord_x / coord_y
+        │
+        └── EDGE
+             ├── source
+             └── target
 ```
 
-## 데이터 관계
+- `MATERIAL`: 관리할 지식 자료
+- `TAG`: 자료 분류 및 검색을 위한 태그
+- `MINDMAP_MATERIAL`: 특정 마인드맵에 포함된 자료와 해당 노드의 좌표 관리
+- `EDGE`: 같은 마인드맵에 포함된 자료 간의 연결 관계 관리
 
-자료와 태그는 연결 테이블을 이용한 N:M 관계입니다.
+---
+
+## 주요 구현
+
+### 사용자 인증 및 접근 제어
+
+Spring Security를 적용하여 로그인 사용자를 인증하고, 인증된 사용자 정보를 기반으로 자료의 작성자를 관리합니다.
+
+자료 조회·수정·삭제 시 사용자 정보를 함께 검증하여 **본인이 관리할 수 있는 자료만 접근하도록 구현**했습니다.
+
+### Material - Tag 관계 관리
+
+자료와 태그의 다대다 관계를 `MATERIAL_TAG` 테이블로 분리했습니다.
+
+자료 생성·수정 시 태그 관계를 함께 관리하고, 태그 삭제 시 연결된 관계도 정리합니다.
+
+### 마인드맵 데이터 모델
+
+동일한 Material을 여러 마인드맵에서 사용할 수 있도록 좌표 정보를 `MATERIAL`이 아닌 `MINDMAP_MATERIAL`에서 관리합니다.
+
+따라서 하나의 자료가 마인드맵마다 다른 위치를 가질 수 있습니다.
+
+### 자료 간 연결 관계
+
+마인드맵의 자료 간 연결을 `EDGE`로 분리하여 관리합니다.
+
+Edge의 source와 target이 해당 마인드맵에 실제로 포함된 자료인지 검증하여 데이터 무결성을 유지합니다.
+
+### Cytoscape.js 기반 시각화
+
+백엔드에서 마인드맵의 노드와 Edge 데이터를 Cytoscape.js에서 사용할 수 있는 JSON 형태로 제공하고, 프론트엔드에서 이를 그래프로 렌더링합니다.
+
+---
+
+## 개발 흐름
 
 ```text
-User 1 ─── N Material 1 ─── N Material_Tag N ─── 1 Tag
+Material CRUD
+      ↓
+Spring Security
+      ↓
+Tag & 검색
+      ↓
+Material - Tag 관계
+      ↓
+Mindmap
+      ↓
+Mindmap - Material
+      ↓
+Edge
+      ↓
+Cytoscape.js
+      ↓
+노드 생성 / 이동
 ```
 
-`material_tag`는 `material_id`, `tag_id` 복합 키를 사용하여 같은 관계가 중복 저장되지 않도록 합니다.
+기본적인 자료 관리 기능을 구현한 뒤, 자료 간 관계를 표현하고 시각적으로 탐색할 수 있도록 마인드맵 기능을 단계적으로 확장했습니다.
 
-## 실행 환경
+---
 
-- Java 17 이상
-- PostgreSQL 14 이상
-- Git
+## API Documentation
 
-## 화면 및 API
-
-주요 화면:
-
-- `/login.html` 로그인
-- `/signup.html` 회원가입
-- `/materials.html` 자료 목록
-- `/material-create.html` 자료 등록
-- `/tags.html` 태그 관리
-
-Swagger UI:
+Swagger UI에서 API를 확인하고 테스트할 수 있습니다.
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+/swagger-ui/index.html
 ```
 
-주요 API 리소스:
+---
 
-| 리소스 | 경로 | 설명 |
-| --- | --- | --- |
-| User | `/user` | 사용자 조회, 회원가입, 로그인 |
-| Material | `/material` | 자료 CRUD 및 제목 검색 |
-| Tag | `/tag` | 태그 CRUD |
+## 향후 개선
 
-## 테스트
-
-```bash
-gradlew.bat test
-```
-
-macOS / Linux에서는 `./gradlew test`를 사용합니다.
-
-## 현재 작업 및 개선 예정
-
-- 태그 기반 자료 검색
+- 마인드맵 편집 기능 고도화
+- 노드 및 Edge UI 개선
+- 대규모 마인드맵 조회 및 좌표 업데이트 최적화
 - 테스트 코드 확대
-- API 설계 및 응답 구조 개선
-- Docker 기반 배포
-- CI/CD 구성
-- Elasticsearch 도입 검토
-- AI 기반 자료 추천 및 요약 검토
-
-## 라이선스
-
-현재 별도의 라이선스를 지정하지 않았습니다.
+- 마인드맵 탐색 및 자료 검색 기능 개선

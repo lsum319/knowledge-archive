@@ -20,7 +20,7 @@ const attachCardNavigation = card => {
     const detailId = card.dataset.id || card.getAttribute('data-id');
     if (!detailId) return;
 
-    const detailUrl = `/mindmap-detail.html?id=${encodeURIComponent(detailId)}`;
+    const detailUrl = `/cytoscape.html?id=${encodeURIComponent(detailId)}`;
     card.setAttribute('tabindex', '0');
     card.addEventListener('click', event => {
         if (event.target.closest('button')) return;
@@ -60,7 +60,7 @@ const renderMindmaps = mindmaps => {
         card.dataset.id = mindmap.id;
         attachCardNavigation(card);
         item.querySelector('.mindmap-name').textContent = mindmap.name;
-        item.querySelector('.mindmap-created').textContent = mindmap.createdAt || '';
+        item.querySelector('.mindmap-created').textContent = String(mindmap.createdAt || '').replace('T', ' ');
         item.querySelector('.delete-mindmap').addEventListener('click', deleteMindmap);
         return item;
     }));

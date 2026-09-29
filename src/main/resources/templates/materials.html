@@ -47,7 +47,7 @@
         <div id="materialList" class="list" th:hidden="${#lists.isEmpty(materials)}">
             <article class="material" th:each="item : ${materials}" th:attr="data-id=${item.id}" tabindex="0"><h2><span
                     class="material-title" th:text="${item.title}">Title</span></h2>
-                <p><strong>Created:</strong> <span th:text="${item.createdAt}">Date</span></p>
+                <p><strong>Created:</strong> <span th:text="${#strings.replace(item.createdAt, 'T', ' ')}">Date</span></p>
                 <p th:text="${item.memo ?: 'No memo available.'}">Memo</p>
                 <p th:if="${item.url}"><strong>Link:</strong> <a class="url" th:href="${item.url}" th:text="${item.url}"
                                                                  target="_blank" rel="noopener noreferrer">URL</a></p>

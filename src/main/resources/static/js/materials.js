@@ -91,7 +91,7 @@ const renderMaterials = materials => {
         attachCardNavigation(card);
         title.removeAttribute('href');
         title.textContent = material.title;
-        item.querySelector('.material-created').textContent = material.createdAt;
+        item.querySelector('.material-created').textContent = String(material.createdAt || '').replace('T', ' ');
         item.querySelector('.material-memo').textContent = material.memo || 'No memo available.';
         if (material.url) {
             url.href = material.url;

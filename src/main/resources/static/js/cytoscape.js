@@ -20,9 +20,14 @@ const connectButton = document.createElement('button');
 const deleteButton = document.createElement('button');
 let hideConnectButtonTimer;
 let hideDeleteButtonTimer;
+let hideMemoTooltipTimer;
 let hoveredNode;
+let hoveredMemoNode;
+let isMemoNodeHovered = false;
+let isMemoTooltipHovered = false;
 let selectedNode;
 let availableTags = [];
+const memoCache = new Map();
 
 connectButton.type = 'button';
 connectButton.className = 'node-connect-button';
@@ -30,6 +35,21 @@ connectButton.textContent = '연결 시작';
 connectButton.setAttribute('aria-label', '선택한 노드에서 연결 시작');
 connectButton.hidden = true;
 graphContainer.appendChild(connectButton);
+
+const memoTooltip = document.createElement('div');
+memoTooltip.className = 'node-memo-tooltip';
+memoTooltip.setAttribute('role', 'tooltip');
+memoTooltip.hidden = true;
+graphContainer.appendChild(memoTooltip);
+memoTooltip.addEventListener('mouseenter', () => {
+    isMemoTooltipHovered = true;
+    clearTimeout(hideMemoTooltipTimer);
+});
+memoTooltip.addEventListener('mouseleave', () => {
+    isMemoTooltipHovered = false;
+    scheduleHideMemoTooltip();
+});
+memoTooltip.addEventListener('wheel', event => event.stopPropagation());
 
 deleteButton.type = 'button';
 deleteButton.className = 'edge-delete-button';
@@ -46,6 +66,70 @@ const showConnectButton = node => {
     connectButton.style.left = `${position.x}px`;
     connectButton.style.top = `${position.y - 24}px`;
     connectButton.hidden = false;
+};
+
+const positionMemoTooltip = node => {
+    if (hoveredMemoNode !== node || memoTooltip.hidden) return;
+
+    const position = node.renderedPosition();
+    const margin = 12;
+    const left = Math.min(position.x + 16, graphContainer.clientWidth - memoTooltip.offsetWidth - margin);
+    const top = Math.min(position.y + 16, graphContainer.clientHeight - memoTooltip.offsetHeight - margin);
+    memoTooltip.style.left = `${Math.max(margin, left)}px`;
+    memoTooltip.style.top = `${Math.max(margin, top)}px`;
+};
+
+const renderMemoTooltip = (node, memo) => {
+    if (hoveredMemoNode !== node) return;
+
+    memoTooltip.textContent = memo || 'No memo available.';
+    memoTooltip.hidden = false;
+    positionMemoTooltip(node);
+};
+
+const showMemoTooltip = async node => {
+    clearTimeout(hideMemoTooltipTimer);
+    hoveredMemoNode = node;
+    isMemoNodeHovered = true;
+    memoTooltip.textContent = 'Loading memo...';
+    memoTooltip.hidden = false;
+    positionMemoTooltip(node);
+
+    const materialId = String(node.data('materialId'));
+    if (memoCache.has(materialId)) {
+        renderMemoTooltip(node, memoCache.get(materialId));
+        return;
+    }
+
+    try {
+        const response = await fetch(`/material/${encodeURIComponent(materialId)}`, {credentials: 'same-origin'});
+        if (!response.ok) throw new Error();
+
+        const material = await response.json();
+        const memo = material.memo || '';
+        memoCache.set(materialId, memo);
+        renderMemoTooltip(node, memo);
+    } catch {
+        renderMemoTooltip(node, 'Failed to load memo.');
+    }
+};
+
+const scheduleHideMemoTooltip = () => {
+    clearTimeout(hideMemoTooltipTimer);
+    if (isMemoNodeHovered || isMemoTooltipHovered) return;
+
+    hideMemoTooltipTimer = setTimeout(() => {
+        if (isMemoNodeHovered || isMemoTooltipHovered) return;
+        hoveredMemoNode = undefined;
+        memoTooltip.hidden = true;
+    }, 150);
+};
+
+const hideMemoTooltip = node => {
+    if (hoveredMemoNode !== node) return;
+
+    isMemoNodeHovered = false;
+    scheduleHideMemoTooltip();
 };
 
 const hideConnectButton = () => {
@@ -535,6 +619,7 @@ const loadGraph = async () => {
         if (!selectedNode) return;
 
         try {
+            const memo = nodeMemoInput.value.trim();
             const response = await fetch(`/material/${encodeURIComponent(selectedNode.data('materialId'))}`, {
                 method: 'PUT',
                 credentials: 'same-origin',
@@ -542,13 +627,16 @@ const loadGraph = async () => {
                 body: JSON.stringify({
                     title: nodeTitleInput.value.trim(),
                     url: nodeUrlInput.value.trim(),
-                    memo: nodeMemoInput.value.trim(),
+                    memo,
                     tagIds: Array.from(nodeTags.querySelectorAll('input:checked')).map(input => Number(input.value))
                 })
             });
             if (!response.ok) throw new Error('Failed to update node details.');
 
             selectedNode.data('title', nodeTitleInput.value.trim());
+            const materialId = String(selectedNode.data('materialId'));
+            memoCache.set(materialId, memo);
+            renderMemoTooltip(selectedNode, memo);
             setDetailsMessage('Node details updated.', true);
             setMessage('Node details updated.', true);
         } catch (error) {
@@ -590,8 +678,14 @@ const loadGraph = async () => {
         }
     });
 
-    cy.on('mouseover', 'node', event => showConnectButton(event.target));
-    cy.on('mouseout', 'node', hideConnectButton);
+    cy.on('mouseover', 'node', event => {
+        showConnectButton(event.target);
+        showMemoTooltip(event.target);
+    });
+    cy.on('mouseout', 'node', event => {
+        hideConnectButton();
+        hideMemoTooltip(event.target);
+    });
     cy.on('mouseover', 'edge:not(.connection-preview)', event => {
         event.target.addClass('edge-hover');
         showDeleteButton(event.target);
@@ -635,6 +729,7 @@ const loadGraph = async () => {
         }, 220);
     });
     cy.on('pan zoom position', updateDeleteButtonPosition);
+    cy.on('pan zoom position', () => positionMemoTooltip(hoveredMemoNode));
     cy.on('dragfree', 'node', event => {
         updateNodeCoords(event.target).catch(error => setMessage(error.message));
     });

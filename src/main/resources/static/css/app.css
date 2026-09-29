@@ -453,6 +453,24 @@ h1 {
     background: var(--accent)
 }
 
+.node-memo-tooltip {
+    position: absolute;
+    z-index: 3;
+    max-width: min(320px, calc(100% - 24px));
+    max-height: 180px;
+    overflow: auto;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, .18)
+}
+
 .edge-delete-button {
     position: absolute;
     z-index: 2;

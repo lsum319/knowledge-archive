@@ -41,7 +41,7 @@
         <where>
             m.user_id = #{userId}
             <if test="title != null and title != ''">
-                AND title LIKE '%' || #{title} || '%'
+                AND title ILIKE '%' || #{title} || '%'
             </if>
         </where>
     </select>
@@ -73,7 +73,7 @@
                     WHERE mt2.material_id = m.id
                     AND (
                         <foreach collection="tags" item="tag" separator=" OR ">
-                            t2.name LIKE '%' || #{tag} || '%'
+                            t2.name ILIKE '%' || #{tag} || '%'
                         </foreach>
                     )
                 )

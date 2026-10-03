@@ -15,7 +15,7 @@
         <where>
             USER_ID = #{userId}
             <if test="name != null and name != ''">
-                AND name LIKE '%' || #{name} || '%'
+                AND name ILIKE '%' || #{name} || '%'
             </if>
         </where>
     </select>

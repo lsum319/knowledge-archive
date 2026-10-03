@@ -68,22 +68,25 @@
     <dialog id="createNodeDialog" class="edge-dialog" aria-labelledby="createNodeDialogTitle">
         <h2 id="createNodeDialogTitle">Create node</h2>
         <form id="createNodeForm">
-            <div class="field">
-                <label for="newNodeTitle">Title</label>
-                <input id="newNodeTitle" required>
-            </div>
-            <div class="field">
-                <label for="newNodeUrl">Reference URL</label>
-                <input id="newNodeUrl" type="url">
-            </div>
-            <div class="field">
-                <label for="newNodeMemo">Memo</label>
-                <textarea id="newNodeMemo"></textarea>
+            <div id="newMaterialFields">
+                <div class="field">
+                    <label for="newNodeTitle">Title</label>
+                    <input id="newNodeTitle" required>
+                    <div id="existingMaterialResults" class="material-search-results" role="listbox" aria-label="Matching existing materials" hidden></div>
+                </div>
+                <div class="field">
+                    <label for="newNodeUrl">Reference URL</label>
+                    <input id="newNodeUrl" type="url">
+                </div>
+                <div class="field">
+                    <label for="newNodeMemo">Memo</label>
+                    <textarea id="newNodeMemo"></textarea>
+                </div>
             </div>
             <p id="createNodeMessage" class="message" role="status" aria-live="polite"></p>
             <div class="form-actions">
                 <button id="cancelCreateNode" class="button secondary" type="button">Cancel</button>
-                <button class="button primary" type="submit">Create node</button>
+                <button id="submitCreateNode" class="button primary" type="submit">Create node</button>
             </div>
         </form>
     </dialog>

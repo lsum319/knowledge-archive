@@ -17,6 +17,21 @@ public interface MindmapMapper {
             @Param("mindmapId") int mindmapId
     );
 
+    // 노드 생성 시 material 검색
+    List<MindmapMaterialDomain> selectMaterialsForNewNode(
+            @Param("mindmapId") int mindmapId
+            ,@Param("title") String title
+    );
+
+    // 개별 노드의 툴팁 조회
+    String selectNodeMemoById(@Param("id") int id);
+
+    // 개별 노드의 툴팁 메모 작성
+    int insertNodeMemo(MindmapMaterialDomain mindmapMaterialDomain);
+
+    // 개별 노드의 툴팁 메모 수정
+    int updateNodeMemo(MindmapMaterialDomain mindmapMaterialDomain);
+
     // cytoscape를 위한 nodeData(material data, 좌표) 조회
     List<MindmapMaterialDomain> selectNodeDataById(
             @Param("mindmapId") int mindmapId

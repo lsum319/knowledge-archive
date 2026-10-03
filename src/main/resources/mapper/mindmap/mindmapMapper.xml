@@ -46,6 +46,27 @@
         WHERE mim.mindmap_id = #{mindmapId}
     </select>
 
+    <select id="selectNodeMemoById" parameterType="int" resultType="String">
+        SELECT
+            memo
+        FROM
+            "MINDMAP_MATERIAL"
+        WHERE
+            id = #{id}
+    </select>
+
+    <update id="insertNodeMemo" parameterType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
+        UPDATE "MINDMAP_MATERIAL"
+        SET memo = #{memo}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateNodeMemo" parameterType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
+        UPDATE "MINDMAP_MATERIAL"
+        SET memo = #{memo}
+        WHERE id = #{id}
+    </update>
+
     <insert id="insertMindmap" parameterType="com.sumin.knowledgearchive.mindmap.MindmapDomain">
         INSERT INTO "MINDMAP"
             ("name"
@@ -60,6 +81,20 @@
         DELETE FROM "MINDMAP"
         WHERE id = #{id}
     </delete>
+
+    <select id="selectMaterialsForNewNode" resultType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
+        SELECT
+            m.id as material_id
+            ,m.title
+        FROM "MATERIAL" m
+        LEFT JOIN "MINDMAP_MATERIAL" mim
+        ON m.id = mim.material_id
+        WHERE 
+            mim.mindmap_id IS DISTINCT FROM #{mindmapId}
+        <if test="title != null and title != ''">
+            AND m.title ILIKE '%' || #{title} || '%'
+        </if>
+    </select>
 
     <insert id="insertMindmapMaterial" parameterType="com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain">
         INSERT INTO "MINDMAP_MATERIAL"

@@ -7,6 +7,7 @@ public class MindmapMaterialDomain {
     private int id;
     private int mindmapId;
     private int materialId;
+    private String memo;
 
     // 필요에 의해 추가된 material의 필드
     private String title;

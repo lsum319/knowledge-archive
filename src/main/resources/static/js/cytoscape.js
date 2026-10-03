@@ -7,6 +7,8 @@ const nodeDetailsForm = document.getElementById('nodeDetailsForm');
 const createNodeDialog = document.getElementById('createNodeDialog');
 const createNodeForm = document.getElementById('createNodeForm');
 const createNodeMessage = document.getElementById('createNodeMessage');
+const existingMaterialResults = document.getElementById('existingMaterialResults');
+const submitCreateNodeButton = document.getElementById('submitCreateNode');
 const newNodeTitleInput = document.getElementById('newNodeTitle');
 const newNodeUrlInput = document.getElementById('newNodeUrl');
 const newNodeMemoInput = document.getElementById('newNodeMemo');
@@ -16,25 +18,18 @@ const nodeUrlInput = document.getElementById('nodeUrl');
 const nodeMemoInput = document.getElementById('nodeMemo');
 const nodeTags = document.getElementById('nodeTags');
 const toggleNodeSidebar = document.getElementById('toggleNodeSidebar');
-const connectButton = document.createElement('button');
-const deleteButton = document.createElement('button');
-let hideConnectButtonTimer;
-let hideDeleteButtonTimer;
 let hideMemoTooltipTimer;
-let hoveredNode;
 let hoveredMemoNode;
+let keyboardSelectedNode;
 let isMemoNodeHovered = false;
 let isMemoTooltipHovered = false;
+let isMemoEditorOpen = false;
 let selectedNode;
 let availableTags = [];
+let selectedExistingMaterialId;
+let materialSearchTimer;
+let materialSearchRequestId = 0;
 const memoCache = new Map();
-
-connectButton.type = 'button';
-connectButton.className = 'node-connect-button';
-connectButton.textContent = '연결 시작';
-connectButton.setAttribute('aria-label', '선택한 노드에서 연결 시작');
-connectButton.hidden = true;
-graphContainer.appendChild(connectButton);
 
 const memoTooltip = document.createElement('div');
 memoTooltip.className = 'node-memo-tooltip';
@@ -50,23 +45,9 @@ memoTooltip.addEventListener('mouseleave', () => {
     scheduleHideMemoTooltip();
 });
 memoTooltip.addEventListener('wheel', event => event.stopPropagation());
-
-deleteButton.type = 'button';
-deleteButton.className = 'edge-delete-button';
-deleteButton.textContent = '삭제';
-deleteButton.setAttribute('aria-label', '선택한 edge 삭제');
-deleteButton.hidden = true;
-graphContainer.appendChild(deleteButton);
-
-const showConnectButton = node => {
-    clearTimeout(hideConnectButtonTimer);
-    hoveredNode = node;
-
-    const position = node.renderedPosition();
-    connectButton.style.left = `${position.x}px`;
-    connectButton.style.top = `${position.y - 24}px`;
-    connectButton.hidden = false;
-};
+['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'click'].forEach(type => {
+    memoTooltip.addEventListener(type, event => event.stopPropagation());
+});
 
 const positionMemoTooltip = node => {
     if (hoveredMemoNode !== node || memoTooltip.hidden) return;
@@ -80,43 +61,119 @@ const positionMemoTooltip = node => {
 };
 
 const renderMemoTooltip = (node, memo) => {
-    if (hoveredMemoNode !== node) return;
+    if (hoveredMemoNode !== node || !/[^ ]/.test(memo)) return;
 
-    memoTooltip.textContent = memo || 'No memo available.';
+    memoTooltip.classList.remove('editing');
+    memoTooltip.textContent = memo;
     memoTooltip.hidden = false;
     positionMemoTooltip(node);
 };
 
+const openMemoEditor = (node, initialMemo = '', method = 'POST') => {
+    clearTimeout(hideMemoTooltipTimer);
+    hoveredMemoNode = node;
+    isMemoNodeHovered = false;
+    isMemoEditorOpen = true;
+    memoTooltip.classList.add('editing');
+    memoTooltip.replaceChildren();
+
+    const input = document.createElement('textarea');
+    input.setAttribute('aria-label', '노드 메모');
+    input.placeholder = '메모를 입력하세요';
+    input.value = initialMemo;
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.className = 'button small';
+    saveButton.textContent = '저장';
+    saveButton.addEventListener('click', async () => {
+        const memo = input.value;
+        const nodeId = Number(node.data('id'));
+
+        try {
+            const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}`, {
+                method,
+                credentials: 'same-origin',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: nodeId, memo})
+            });
+            if (!response.ok) throw new Error();
+
+            memoCache.set(String(nodeId), memo);
+            isMemoEditorOpen = false;
+            memoTooltip.replaceChildren();
+            if (/[^ ]/.test(memo)) {
+                renderMemoTooltip(node, memo);
+            } else {
+                memoTooltip.hidden = true;
+            }
+            if (!isMemoNodeHovered && !isMemoTooltipHovered) scheduleHideMemoTooltip();
+            setMessage('메모를 저장했습니다.', true);
+        } catch {
+            setMessage('메모 저장에 실패했습니다.');
+        }
+    });
+
+    memoTooltip.append(input, saveButton);
+    memoTooltip.hidden = false;
+    positionMemoTooltip(node);
+    input.focus();
+};
+
+memoTooltip.addEventListener('click', () => {
+    if (isMemoEditorOpen || memoTooltip.hidden || !hoveredMemoNode) return;
+
+    const nodeId = String(hoveredMemoNode.data('id'));
+    const memo = memoCache.get(nodeId);
+    if (typeof memo === 'string' && /[^ ]/.test(memo)) {
+        openMemoEditor(hoveredMemoNode, memo, 'PUT');
+    }
+});
+
+const openMemoEditorForEmptyNode = async node => {
+    const nodeId = String(node.data('id'));
+    let memo = memoCache.get(nodeId);
+
+    if (memo === undefined) {
+        try {
+            const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}`, {credentials: 'same-origin'});
+            if (!response.ok) throw new Error();
+            memo = await response.text();
+            memoCache.set(nodeId, memo);
+        } catch {
+            return;
+        }
+    }
+
+    if (!/[^ ]/.test(memo)) openMemoEditor(node);
+};
+
 const showMemoTooltip = async node => {
+    if (isMemoEditorOpen) return;
     clearTimeout(hideMemoTooltipTimer);
     hoveredMemoNode = node;
     isMemoNodeHovered = true;
-    memoTooltip.textContent = 'Loading memo...';
-    memoTooltip.hidden = false;
-    positionMemoTooltip(node);
+    memoTooltip.hidden = true;
 
-    const materialId = String(node.data('materialId'));
-    if (memoCache.has(materialId)) {
-        renderMemoTooltip(node, memoCache.get(materialId));
+    const nodeId = String(node.data('id'));
+    if (memoCache.has(nodeId)) {
+        renderMemoTooltip(node, memoCache.get(nodeId));
         return;
     }
 
     try {
-        const response = await fetch(`/material/${encodeURIComponent(materialId)}`, {credentials: 'same-origin'});
+        const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}`, {credentials: 'same-origin'});
         if (!response.ok) throw new Error();
 
-        const material = await response.json();
-        const memo = material.memo || '';
-        memoCache.set(materialId, memo);
+        const memo = await response.text();
+        memoCache.set(nodeId, memo);
         renderMemoTooltip(node, memo);
-    } catch {
-        renderMemoTooltip(node, 'Failed to load memo.');
-    }
+    } catch {}
 };
 
 const scheduleHideMemoTooltip = () => {
     clearTimeout(hideMemoTooltipTimer);
-    if (isMemoNodeHovered || isMemoTooltipHovered) return;
+    if (isMemoNodeHovered || isMemoTooltipHovered || isMemoEditorOpen) return;
 
     hideMemoTooltipTimer = setTimeout(() => {
         if (isMemoNodeHovered || isMemoTooltipHovered) return;
@@ -132,46 +189,16 @@ const hideMemoTooltip = node => {
     scheduleHideMemoTooltip();
 };
 
-const hideConnectButton = () => {
-    clearTimeout(hideConnectButtonTimer);
-    hideConnectButtonTimer = setTimeout(() => {
-        connectButton.hidden = true;
-    }, 100);
+const closeMemoTooltip = () => {
+    clearTimeout(hideMemoTooltipTimer);
+    hoveredMemoNode = undefined;
+    isMemoNodeHovered = false;
+    isMemoTooltipHovered = false;
+    isMemoEditorOpen = false;
+    memoTooltip.hidden = true;
+    memoTooltip.classList.remove('editing');
+    memoTooltip.replaceChildren();
 };
-
-const showDeleteButton = edge => {
-    clearTimeout(hideDeleteButtonTimer);
-
-    const sourcePosition = edge.source().renderedPosition();
-    const targetPosition = edge.target().renderedPosition();
-    deleteButton.style.left = `${(sourcePosition.x + targetPosition.x) / 2}px`;
-    deleteButton.style.top = `${(sourcePosition.y + targetPosition.y) / 2 - 18}px`;
-    deleteButton.hidden = false;
-    deleteButton.edge = edge;
-};
-
-const updateDeleteButtonPosition = () => {
-    const edge = deleteButton.edge;
-    if (!edge || edge.removed()) return;
-
-    const sourcePosition = edge.source().renderedPosition();
-    const targetPosition = edge.target().renderedPosition();
-    deleteButton.style.left = `${(sourcePosition.x + targetPosition.x) / 2}px`;
-    deleteButton.style.top = `${(sourcePosition.y + targetPosition.y) / 2 - 18}px`;
-};
-
-const hideDeleteButton = () => {
-    clearTimeout(hideDeleteButtonTimer);
-    hideDeleteButtonTimer = setTimeout(() => {
-        deleteButton.hidden = true;
-        deleteButton.edge = undefined;
-    }, 100);
-};
-
-connectButton.addEventListener('mouseenter', () => clearTimeout(hideConnectButtonTimer));
-connectButton.addEventListener('mouseleave', hideConnectButton);
-deleteButton.addEventListener('mouseenter', () => clearTimeout(hideDeleteButtonTimer));
-deleteButton.addEventListener('mouseleave', hideDeleteButton);
 
 const setMessage = (text, success = false) => {
     message.textContent = text;
@@ -252,6 +279,84 @@ const showCreateNodeForm = () => {
     setCreateNodeMessage('');
     createNodeDialog.showModal();
     newNodeTitleInput.focus();
+};
+
+const searchExistingMaterials = async title => {
+    const requestId = ++materialSearchRequestId;
+    existingMaterialResults.replaceChildren();
+    existingMaterialResults.hidden = true;
+    if (!title) return;
+
+    try {
+        const response = await fetch(
+            `/mindmap/material/${encodeURIComponent(window.mindmapId)}?title=${encodeURIComponent(title)}`,
+            {credentials: 'same-origin'}
+        );
+        if (!response.ok) throw new Error('Failed to search existing materials.');
+        const materials = await response.json();
+        if (requestId !== materialSearchRequestId) return;
+
+        const uniqueMaterials = Array.from(new Map(
+            materials.map(material => [String(material.materialId), material])
+        ).values());
+        if (!uniqueMaterials.length) {
+            const emptyOption = document.createElement('div');
+            emptyOption.className = 'material-search-empty';
+            emptyOption.textContent = 'No matching existing materials.';
+            existingMaterialResults.appendChild(emptyOption);
+            existingMaterialResults.hidden = false;
+            return;
+        }
+
+        for (const material of uniqueMaterials) {
+            const option = document.createElement('button');
+            option.type = 'button';
+            option.className = 'material-search-option';
+            option.setAttribute('role', 'option');
+            option.textContent = material.title;
+            option.addEventListener('click', async () => {
+                const selectionRequestId = ++materialSearchRequestId;
+                option.disabled = true;
+                submitCreateNodeButton.disabled = true;
+                submitCreateNodeButton.textContent = 'Loading material...';
+
+                try {
+                    const detailResponse = await fetch(
+                        `/material/${encodeURIComponent(material.materialId)}`,
+                        {credentials: 'same-origin'}
+                    );
+                    if (!detailResponse.ok) throw new Error('Failed to load material details.');
+                    const detail = await detailResponse.json();
+                    if (selectionRequestId !== materialSearchRequestId) return;
+
+                    selectedExistingMaterialId = detail.id;
+                    newNodeTitleInput.value = detail.title || '';
+                    newNodeUrlInput.value = detail.url || '';
+                    newNodeMemoInput.value = detail.memo || '';
+                    newNodeUrlInput.readOnly = true;
+                    newNodeMemoInput.readOnly = true;
+                    existingMaterialResults.replaceChildren();
+                    existingMaterialResults.hidden = true;
+                    setCreateNodeMessage('');
+                    submitCreateNodeButton.textContent = 'Add selected material';
+                } catch (error) {
+                    if (selectionRequestId === materialSearchRequestId) {
+                        setCreateNodeMessage(error.message);
+                        submitCreateNodeButton.textContent = 'Create node';
+                    }
+                } finally {
+                    option.disabled = false;
+                    if (selectionRequestId === materialSearchRequestId) {
+                        submitCreateNodeButton.disabled = false;
+                    }
+                }
+            });
+            existingMaterialResults.appendChild(option);
+        }
+        existingMaterialResults.hidden = false;
+    } catch (error) {
+        if (requestId === materialSearchRequestId) setCreateNodeMessage(error.message);
+    }
 };
 
 const hideCreateNodeForm = () => {
@@ -366,15 +471,6 @@ const loadGraph = async () => {
                 }
             },
             {
-                selector: 'edge.edge-hover',
-                style: {
-                    width: 4,
-                    'line-color': '#f59e0b',
-                    'target-arrow-color': '#f59e0b',
-                    color: '#92400e'
-                }
-            },
-            {
                 selector: 'edge:selected',
                 style: {
                     width: 5,
@@ -383,14 +479,6 @@ const loadGraph = async () => {
                     color: '#991b1b'
                 }
             },
-            {
-                selector: 'edge:selected.edge-hover',
-                style: {
-                    'line-color': '#f59e0b',
-                    'target-arrow-color': '#f59e0b',
-                    color: '#92400e'
-                }
-            }
         ],
         layout: {
             name: 'preset',
@@ -441,18 +529,15 @@ const loadGraph = async () => {
     };
 
     const startConnection = sourceNode => {
-        const node = sourceNode || hoveredNode;
-        if (!node || connectionPreviewNode) return;
+        if (!sourceNode || connectionPreviewNode) return;
 
-        connectionSourceNode = node;
+        connectionSourceNode = sourceNode;
         const startPosition = lastPointerEvent
             ? getPointerPosition(lastPointerEvent)
-            : node.position();
+            : sourceNode.position();
         connectionPreviewNode = cy.add({
             group: 'nodes',
-            data: {
-                id: '__connection-preview-node__'
-            },
+            data: {id: '__connection-preview-node__'},
             position: startPosition,
             classes: 'connection-preview'
         });
@@ -465,7 +550,6 @@ const loadGraph = async () => {
             },
             classes: 'connection-preview'
         });
-        connectButton.hidden = true;
     };
 
     const cancelConnection = () => {
@@ -489,9 +573,7 @@ const loadGraph = async () => {
             const response = await fetch('/edge', {
                 method: 'POST',
                 credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     mindmapId: Number(window.mindmapId),
                     sourceId: Number(sourceId),
@@ -538,8 +620,6 @@ const loadGraph = async () => {
             if (!response.ok) throw new Error('Failed to delete connection.');
 
             edge.remove();
-            hideDeleteButton();
-            setMessage('Connection deleted.', true);
         } catch (error) {
             setMessage(error.message);
         }
@@ -572,10 +652,7 @@ const loadGraph = async () => {
         }
     };
 
-    connectButton.addEventListener('click', () => startConnection());
-    deleteButton.addEventListener('click', () => {
-        if (deleteButton.edge) deleteEdge(deleteButton.edge);
-    });
+    graphContainer.addEventListener('mousemove', moveConnectionPreview);
     toggleNodeSidebar.addEventListener('click', () => {
         const isOpen = toggleNodeSidebar.getAttribute('aria-expanded') === 'true';
         setSidebarOpen(!isOpen);
@@ -589,12 +666,53 @@ const loadGraph = async () => {
     createNodeDialog.addEventListener('close', () => {
         createNodeForm.hidden = true;
         createNodeForm.reset();
+        selectedExistingMaterialId = undefined;
+        clearTimeout(materialSearchTimer);
+        materialSearchRequestId++;
+        newNodeUrlInput.readOnly = false;
+        newNodeMemoInput.readOnly = false;
+        submitCreateNodeButton.disabled = false;
+        existingMaterialResults.replaceChildren();
+        existingMaterialResults.hidden = true;
+        submitCreateNodeButton.textContent = 'Create node';
         setCreateNodeMessage('');
+    });
+    newNodeTitleInput.addEventListener('input', () => {
+        clearTimeout(materialSearchTimer);
+        materialSearchRequestId++;
+        submitCreateNodeButton.disabled = false;
+        setCreateNodeMessage('');
+        existingMaterialResults.replaceChildren();
+        existingMaterialResults.hidden = true;
+        if (selectedExistingMaterialId !== undefined) {
+            selectedExistingMaterialId = undefined;
+            newNodeUrlInput.value = '';
+            newNodeMemoInput.value = '';
+            newNodeUrlInput.readOnly = false;
+            newNodeMemoInput.readOnly = false;
+        }
+        submitCreateNodeButton.textContent = 'Create node';
+        const title = newNodeTitleInput.value.trim();
+        materialSearchTimer = setTimeout(() => searchExistingMaterials(title), 300);
     });
     createNodeForm.addEventListener('submit', async event => {
         event.preventDefault();
 
         try {
+            if (selectedExistingMaterialId !== undefined) {
+                const response = await fetch(`/mindmap/${encodeURIComponent(window.mindmapId)}`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({materialId: selectedExistingMaterialId})
+                });
+                if (!response.ok) throw new Error('Failed to add the selected material.');
+
+                setCreateNodeMessage('Material added to the mindmap.', true);
+                window.location.reload();
+                return;
+            }
+
             const response = await fetch(`/cytomap/node/${encodeURIComponent(window.mindmapId)}`, {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -634,16 +752,12 @@ const loadGraph = async () => {
             if (!response.ok) throw new Error('Failed to update node details.');
 
             selectedNode.data('title', nodeTitleInput.value.trim());
-            const materialId = String(selectedNode.data('materialId'));
-            memoCache.set(materialId, memo);
-            renderMemoTooltip(selectedNode, memo);
             setDetailsMessage('Node details updated.', true);
             setMessage('Node details updated.', true);
         } catch (error) {
             setDetailsMessage(error.message);
         }
     });
-    graphContainer.addEventListener('mousemove', moveConnectionPreview);
     graphContainer.addEventListener('wheel', event => {
         event.preventDefault();
 
@@ -671,6 +785,14 @@ const loadGraph = async () => {
         cancelConnection();
     });
     document.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            const target = event.target;
+            if (target instanceof Element && target.closest('button, input, select, textarea, [contenteditable="true"]')) return;
+            if (!keyboardSelectedNode || keyboardSelectedNode.removed()) return;
+
+            event.preventDefault();
+            openMemoEditorForEmptyNode(keyboardSelectedNode);
+        }
         if (event.key === 'Escape') cancelConnection();
         if (event.key === 'Delete') {
             event.preventDefault();
@@ -679,20 +801,10 @@ const loadGraph = async () => {
     });
 
     cy.on('mouseover', 'node', event => {
-        showConnectButton(event.target);
         showMemoTooltip(event.target);
     });
     cy.on('mouseout', 'node', event => {
-        hideConnectButton();
         hideMemoTooltip(event.target);
-    });
-    cy.on('mouseover', 'edge:not(.connection-preview)', event => {
-        event.target.addClass('edge-hover');
-        showDeleteButton(event.target);
-    });
-    cy.on('mouseout', 'edge:not(.connection-preview)', event => {
-        event.target.removeClass('edge-hover');
-        hideDeleteButton();
     });
     let backgroundPanPosition;
     cy.on('cxttapstart', event => {
@@ -720,6 +832,7 @@ const loadGraph = async () => {
             return;
         }
 
+        keyboardSelectedNode = event.target.isNode() ? event.target : undefined;
         clearTimeout(tapSelectionTimer);
         tapSelectionTimer = setTimeout(() => {
             cy.elements().unselect();
@@ -728,7 +841,15 @@ const loadGraph = async () => {
             clearNodeDetails();
         }, 220);
     });
-    cy.on('pan zoom position', updateDeleteButtonPosition);
+    cy.on('tap', event => {
+        if (event.target !== cy) return;
+
+        clearTimeout(tapSelectionTimer);
+        cy.elements().unselect();
+        keyboardSelectedNode = undefined;
+        closeMemoTooltip();
+        clearNodeDetails();
+    });
     cy.on('pan zoom position', () => positionMemoTooltip(hoveredMemoNode));
     cy.on('dragfree', 'node', event => {
         updateNodeCoords(event.target).catch(error => setMessage(error.message));
@@ -736,6 +857,7 @@ const loadGraph = async () => {
     cy.on('dbltap', 'node', event => {
         clearTimeout(tapSelectionTimer);
         cy.elements().unselect();
+        keyboardSelectedNode = event.target;
         event.target.select();
         startConnection(event.target);
     });

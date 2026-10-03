@@ -432,27 +432,6 @@ h1 {
     margin: 0
 }
 
-.node-connect-button {
-    position: absolute;
-    z-index: 2;
-    transform: translate(-50%, -100%);
-    border: 1px solid var(--primary);
-    border-radius: 8px;
-    padding: 6px 10px;
-    background: var(--primary);
-    color: #fff;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-    box-shadow: 0 5px 12px rgba(15, 23, 42, .18)
-}
-
-.node-connect-button:hover {
-    background: var(--accent)
-}
-
 .node-memo-tooltip {
     position: absolute;
     z-index: 3;
@@ -471,31 +450,22 @@ h1 {
     box-shadow: 0 8px 22px rgba(15, 23, 42, .18)
 }
 
-.edge-delete-button {
-    position: absolute;
-    z-index: 2;
-    transform: translate(-50%, -100%);
-    border: 1px solid var(--danger);
-    border-radius: 8px;
-    padding: 6px 10px;
-    background: var(--danger);
-    color: #fff;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-    box-shadow: 0 5px 12px rgba(15, 23, 42, .18)
+.node-memo-tooltip:not(.editing) {
+    cursor: pointer
 }
 
-.edge-delete-button:hover {
-    filter: brightness(.9)
+.node-memo-tooltip textarea {
+    display: block;
+    width: min(280px, 70vw);
+    min-height: 88px;
+    margin-bottom: 8px;
+    resize: vertical;
+    font: inherit
 }
 
-.edge-delete-button:focus-visible,
-.node-connect-button:focus-visible {
-    outline: 3px solid rgba(245, 158, 11, .45);
-    outline-offset: 2px
+.node-memo-tooltip .button {
+    display: block;
+    margin-left: auto
 }
 
 .login-card {
@@ -538,7 +508,7 @@ h1 {
     accent-color: #4f46e5
 }
 
-input, textarea {
+input, textarea, select {
     width: 100%;
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -548,7 +518,7 @@ input, textarea {
     background: #fff
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: #6366f1;
     box-shadow: 0 0 0 4px rgba(99, 102, 241, .08)
@@ -847,6 +817,43 @@ textarea {
 .edge-dialog form {
     display: grid;
     gap: 12px
+}
+
+.material-search-results {
+    display: grid;
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff
+}
+
+.material-search-results[hidden] {
+    display: none
+}
+
+.material-search-option {
+    padding: 9px 12px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    font: inherit;
+    cursor: pointer
+}
+
+.material-search-option + .material-search-option {
+    border-top: 1px solid var(--line)
+}
+
+.material-search-empty {
+    padding: 9px 12px;
+    color: var(--muted)
+}
+
+.material-search-option:hover, .material-search-option:focus-visible {
+    outline: none;
+    background: rgba(99, 102, 241, .08)
 }
 
 .edge-dialog .form-actions {

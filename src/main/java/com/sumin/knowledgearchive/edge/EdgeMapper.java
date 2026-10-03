@@ -1,6 +1,7 @@
 package com.sumin.knowledgearchive.edge;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -8,5 +9,6 @@ import java.util.List;
 public interface EdgeMapper {
     List<EdgeDomain> selectEdge(int mindmapId);
     int insertEdge(EdgeDomain edgeDomain);
-    int deleteEdge(EdgeDomain edgeDomain);
+    int deleteEdge(@Param("id") int id);
+    int updateEdge(EdgeDomain edgeDomain);
 }

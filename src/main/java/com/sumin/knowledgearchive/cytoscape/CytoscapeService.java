@@ -47,7 +47,8 @@ public class CytoscapeService {
                                             new CytoscapeDto.EdgeData(
                                                             String.valueOf(data.getId()),
                                                             String.valueOf(data.getSourceId()),
-                                                            String.valueOf(data.getTargetId()), data.getName())))
+                                                            String.valueOf(data.getTargetId()),
+                                                            data.getName())))
                             .toList();
 
             return CytoscapeDto.CytoscapeResponse.of(nodes, edges);

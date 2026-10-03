@@ -15,30 +15,30 @@
         WHERE mindmap_id = #{mindmapId}
     </select>
 
-    <insert id="insertEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
+    <insert id="insertEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain"
+            useGeneratedKeys="true" keyProperty="id">
         INSERT INTO "EDGE"
             (
             mindmap_id
             ,source_id
             ,target_id
-            <if test="name != null">
-            ,name
-            </if>
             )
         VALUES
             (
             #{mindmapId}
             ,#{sourceId}
             ,#{targetId}
-            <if test="name != null">
-            ,#{name}
-            </if>
             )
     </insert>
 
-    <delete id="deleteEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
+    <delete id="deleteEdge" parameterType="int">
         DELETE FROM "EDGE"
-        WHERE source_id = #{sourceId}
-            AND target_id = #{targetId}
+        WHERE id = #{id}
     </delete>
+
+    <update id="updateEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
+        UPDATE "EDGE"
+        SET name = #{name}
+        WHERE id = #{id}
+    </update>
 </mapper>

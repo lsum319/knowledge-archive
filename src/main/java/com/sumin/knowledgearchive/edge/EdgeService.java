@@ -9,11 +9,17 @@ import org.springframework.stereotype.Service;
 public class EdgeService {
     private final EdgeMapper edgeMapper;
 
-    public void insertEdge(EdgeRequest edgeRequest) {
-        edgeMapper.insertEdge(edgeRequest.toDomain());
+    public int insertEdge(EdgeRequest edgeRequest) {
+        EdgeDomain edgeDomain = edgeRequest.toDomain();
+        edgeMapper.insertEdge(edgeDomain);
+        return edgeDomain.getId();
     }
 
-    public void deleteEdge(EdgeRequest edgeRequest) {
-        edgeMapper.deleteEdge(edgeRequest.toDomain());
+    public void deleteEdge(int id) {
+        edgeMapper.deleteEdge(id);
+    }
+
+    public void updateEdge(EdgeRequest edgeRequest) {
+        edgeMapper.updateEdge(edgeRequest.toDomain());
     }
 }

@@ -479,6 +479,12 @@ const loadGraph = async () => {
                     color: '#991b1b'
                 }
             },
+            {
+                selector: 'edge.name-editing',
+                style: {
+                    label: ''
+                }
+            },
         ],
         layout: {
             name: 'preset',
@@ -491,6 +497,15 @@ const loadGraph = async () => {
     let connectionSourceNode;
     let lastPointerEvent;
     let tapSelectionTimer;
+    let edgeNameEditor;
+
+    const positionEdgeNameEditor = () => {
+        if (!edgeNameEditor || edgeNameEditor.edge.removed()) return;
+
+        const midpoint = edgeNameEditor.edge.renderedMidpoint();
+        edgeNameEditor.input.style.left = `${midpoint.x}px`;
+        edgeNameEditor.input.style.top = `${midpoint.y}px`;
+    };
 
     const getPointerPosition = event => {
         const bounds = graphContainer.getBoundingClientRect();
@@ -583,11 +598,12 @@ const loadGraph = async () => {
             });
             if (!response.ok) throw new Error('Failed to create connection.');
 
+            const edgeId = await response.json();
             cancelConnection();
             cy.add({
                 group: 'edges',
                 data: {
-                    id: `edge-${sourceId}-${targetId}-${Date.now()}`,
+                    id: String(edgeId),
                     source: sourceId,
                     target: targetId,
                     label: ''
@@ -600,22 +616,12 @@ const loadGraph = async () => {
     };
 
     const deleteEdge = async edge => {
-        const sourceId = edge.data('source');
-        const targetId = edge.data('target');
+        const edgeId = edge.data('id');
 
         try {
-            const response = await fetch('/edge', {
+            const response = await fetch(`/edge/${encodeURIComponent(edgeId)}`, {
                 method: 'DELETE',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    mindmapId: Number(window.mindmapId),
-                    sourceId: Number(sourceId),
-                    targetId: Number(targetId),
-                    name: null
-                })
+                credentials: 'same-origin'
             });
             if (!response.ok) throw new Error('Failed to delete connection.');
 
@@ -623,6 +629,72 @@ const loadGraph = async () => {
         } catch (error) {
             setMessage(error.message);
         }
+    };
+
+    const saveEdgeName = async (edge, name) => {
+        try {
+            const response = await fetch('/edge', {
+                method: 'PUT',
+                credentials: 'same-origin',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    id: Number(edge.data('id')),
+                    name
+                })
+            });
+            if (!response.ok) throw new Error('Failed to save connection name.');
+
+            edge.data('label', name);
+            setMessage('Connection name saved.', true);
+        } catch (error) {
+            setMessage(error.message);
+        }
+    };
+
+    const finishEdgeNameEdit = save => {
+        if (!edgeNameEditor) return;
+
+        const {edge, input} = edgeNameEditor;
+        edgeNameEditor = undefined;
+        edge.removeClass('name-editing');
+        input.remove();
+
+        if (save) saveEdgeName(edge, input.value.trim());
+    };
+
+    const startEdgeNameEdit = edge => {
+        if (edgeNameEditor) finishEdgeNameEdit(true);
+
+        const input = document.createElement('input');
+        input.className = 'edge-name-editor';
+        input.type = 'text';
+        input.setAttribute('aria-label', 'Connection name');
+        input.value = edge.data('label') || '';
+        graphContainer.appendChild(input);
+        edgeNameEditor = {edge, input};
+        edge.addClass('name-editing');
+
+        ['pointerdown', 'mousedown', 'click', 'dblclick', 'wheel'].forEach(type => {
+            input.addEventListener(type, event => event.stopPropagation());
+        });
+        input.addEventListener('input', () => {
+            input.style.width = `${Math.max(80, Math.min(240, input.value.length * 8 + 24))}px`;
+        });
+        input.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                finishEdgeNameEdit(true);
+            }
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                finishEdgeNameEdit(false);
+            }
+        });
+        input.addEventListener('blur', () => finishEdgeNameEdit(true));
+        input.dispatchEvent(new Event('input'));
+        positionEdgeNameEditor();
+        input.focus();
+        input.select();
     };
 
     const deleteNode = async node => {
@@ -851,6 +923,16 @@ const loadGraph = async () => {
         clearNodeDetails();
     });
     cy.on('pan zoom position', () => positionMemoTooltip(hoveredMemoNode));
+    cy.on('pan zoom position resize', positionEdgeNameEditor);
+    cy.on('cxttap', 'edge', event => {
+        const edge = event.target;
+        const name = prompt('Enter a name for this connection.', edge.data('label') || '');
+        if (name !== null) saveEdgeName(edge, name.trim());
+    });
+    cy.on('dbltap', 'edge', event => {
+        clearTimeout(tapSelectionTimer);
+        startEdgeNameEdit(event.target);
+    });
     cy.on('dragfree', 'node', event => {
         updateNodeCoords(event.target).catch(error => setMessage(error.message));
     });

@@ -13,15 +13,21 @@ import org.springframework.web.bind.annotation.*;
 public class EdgeController {
     private final EdgeService edgeService;
 
-    @Operation(summary = "자료 하위 관계 등록")
+    @Operation(summary = "자료 관계 등록")
     @PostMapping
-    public void insertEdge(@RequestBody EdgeRequest request) {
-        edgeService.insertEdge(request);
+    public int insertEdge(@RequestBody EdgeRequest request) {
+        return edgeService.insertEdge(request);
     }
 
-    @Operation(summary = "자료 하위 관계 삭제")
-    @DeleteMapping
-    public void deleteEdge(@RequestBody EdgeRequest request) {
-        edgeService.deleteEdge(request);
+    @Operation(summary = "자료 관계 삭제")
+    @DeleteMapping("/{id}")
+    public void deleteEdge(@PathVariable int id) {
+        edgeService.deleteEdge(id);
+    }
+
+    @Operation(summary = "자료 관계 이름 등록")
+    @PutMapping
+    public void updateEdge(@RequestBody EdgeRequest request) {
+        edgeService.updateEdge(request);
     }
 }

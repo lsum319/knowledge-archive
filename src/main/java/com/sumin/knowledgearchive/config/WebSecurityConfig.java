@@ -59,7 +59,8 @@ public class WebSecurityConfig {
                                 "/user/login",
                                 "/cytomap/**",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/actuator/**" //차후 인가된 사용자만 접근하도록 수정
                         ).permitAll()
                         .anyRequest().authenticated()
                 ).formLogin((form) -> form

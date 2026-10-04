@@ -26,6 +26,10 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
+	// monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// JWT를 생성/검증하기 위한 API
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
 	// 실제 JWT 구현

@@ -1,6 +1,7 @@
 package com.sumin.knowledgearchive.material;
 
 import com.sumin.knowledgearchive.material.dto.CreateMaterialRequest;
+import com.sumin.knowledgearchive.material.dto.MaterialPageResponse;
 import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.material.dto.UpdateMaterialRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,17 +19,21 @@ public class MaterialController {
     private final MaterialService materialService;
 
     // 제목으로 자료 검색
-    @Operation(summary = "제목으로 자료 검색")
+    @Operation(summary = "제목으로 자료 검색 (페이지당 20개)")
     @GetMapping(params = "title")
-    public List<MaterialResponse> selectMaterials(@RequestParam(name = "title", required = false) String title){
-        return materialService.selectMaterials(title);
+    public MaterialPageResponse selectMaterials(
+            @RequestParam(name = "title", required = false) String title,
+            @RequestParam(name = "page", defaultValue = "1") int page) {
+        return materialService.selectMaterialsPage(title, page);
     }
 
     // 태그로 자료 검색
-    @Operation(summary = "태그로 자료 검색")
+    @Operation(summary = "태그로 자료 검색 (페이지당 20개)")
     @GetMapping(params = "tags")
-    public List<MaterialResponse> selectMaterialsByTag(@RequestParam(name = "tags", required = false) List<String> tags) {
-        return materialService.selectMaterialsByTag(tags);
+    public MaterialPageResponse selectMaterialsByTag(
+            @RequestParam(name = "tags", required = false) List<String> tags,
+            @RequestParam(name = "page", defaultValue = "1") int page) {
+        return materialService.selectMaterialsByTagPage(tags, page);
     }
 
     // 자료 등록

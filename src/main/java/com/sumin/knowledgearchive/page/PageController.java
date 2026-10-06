@@ -1,6 +1,7 @@
 package com.sumin.knowledgearchive.page;
 
 import com.sumin.knowledgearchive.material.MaterialService;
+import com.sumin.knowledgearchive.material.dto.MaterialPageResponse;
 import com.sumin.knowledgearchive.material.dto.MaterialResponse;
 import com.sumin.knowledgearchive.mindmap.MindmapService;
 import com.sumin.knowledgearchive.tag.TagService;
@@ -51,14 +52,21 @@ public class PageController {
             Model model) {
 
         if (tags != null && !tags.isEmpty()) {
-            model.addAttribute("materials", materialService.selectMaterialsByTag(tags));
+            addMaterialPage(model, materialService.selectMaterialsByTagPage(tags, 1));
         } else if (tag != null && !tag.isBlank()) {
-            model.addAttribute("materials", materialService.selectMaterialsByTag(List.of(tag)));
+            addMaterialPage(model, materialService.selectMaterialsByTagPage(List.of(tag), 1));
         } else {
-            model.addAttribute("materials", materialService.selectMaterials(null));
+            addMaterialPage(model, materialService.selectMaterialsPage(null, 1));
         }
 
         return "materials";
+    }
+
+    private void addMaterialPage(Model model, MaterialPageResponse page) {
+        model.addAttribute("materials", page.materials());
+        model.addAttribute("currentPage", page.currentPage());
+        model.addAttribute("totalPages", page.totalPages());
+        model.addAttribute("totalElements", page.totalElements());
     }
 
     @GetMapping({"/material-detail", "/material-detail.html"})

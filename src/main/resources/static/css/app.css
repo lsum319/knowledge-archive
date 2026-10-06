@@ -668,6 +668,42 @@ textarea {
     margin-top: 22px
 }
 
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px
+}
+
+.pagination[hidden] {
+    display: none
+}
+
+.page-button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer
+}
+
+.page-button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent)
+}
+
+.page-button:disabled {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    cursor: default
+}
+
 .material {
     position: relative;
     padding: 20px;

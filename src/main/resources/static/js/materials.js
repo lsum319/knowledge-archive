@@ -7,8 +7,10 @@ const emptyMessage = document.getElementById('emptyMessage');
 const tagSuggestions = document.getElementById('tagSuggestions');
 const materialTemplate = document.getElementById('materialTemplate');
 const tagSuggestionTemplate = document.getElementById('tagSuggestionTemplate');
+const pageNavigation = document.getElementById('pageNavigation');
 let tagRequest;
 let selectedTags = [];
+let activeSearchParameters;
 
 const queryTag = new URLSearchParams(location.search).get('tag');
 const queryTags = new URLSearchParams(location.search).getAll('tags');
@@ -115,6 +117,42 @@ const renderMaterials = materials => {
     emptyMessage.hidden = materials.length !== 0;
 };
 
+const renderPagination = page => {
+    const { currentPage, totalPages, totalElements } = page;
+    pageNavigation.dataset.currentPage = currentPage;
+    pageNavigation.dataset.totalPages = totalPages;
+    pageNavigation.dataset.totalElements = totalElements;
+    pageNavigation.hidden = totalPages <= 1;
+    pageNavigation.replaceChildren();
+    if (totalPages <= 1) return;
+
+    const firstPageInGroup = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    const lastPageInGroup = Math.min(firstPageInGroup + 9, totalPages);
+    const addPageButton = (label, pageNumber, { disabled = false, current = false } = {}) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'page-button';
+        button.textContent = label;
+        button.disabled = disabled;
+        if (current) button.setAttribute('aria-current', 'page');
+        button.addEventListener('click', () => loadMaterialPage(pageNumber));
+        pageNavigation.append(button);
+    };
+
+    if (firstPageInGroup > 1) {
+        addPageButton('Previous', firstPageInGroup - 1);
+    }
+    for (let pageNumber = firstPageInGroup; pageNumber <= lastPageInGroup; pageNumber++) {
+        addPageButton(String(pageNumber), pageNumber, {
+            disabled: pageNumber === currentPage,
+            current: pageNumber === currentPage
+        });
+    }
+    if (lastPageInGroup < totalPages) {
+        addPageButton('Next', lastPageInGroup + 1);
+    }
+};
+
 Array.from(document.querySelectorAll('.material')).forEach(card => {
     attachCardNavigation(card);
 });
@@ -124,6 +162,29 @@ const isTagSearch = () => searchType() === 'tag';
 const hideTagSuggestions = () => {
     tagSuggestions.hidden = true;
     tagSuggestions.replaceChildren();
+};
+
+const createSearchParameters = () => {
+    const keywords = selectedTags.length ? selectedTags : getTagKeywords(searchKeyword.value);
+    const parameters = new URLSearchParams();
+    if (searchType() === 'tag') {
+        keywords.forEach(keyword => parameters.append('tags', keyword));
+    } else {
+        parameters.set('title', searchKeyword.value.trim());
+    }
+    return parameters;
+};
+
+const loadMaterialPage = async page => {
+    const parameters = new URLSearchParams(activeSearchParameters);
+    parameters.set('page', page);
+    const response = await fetch(`/material?${parameters}`, {
+        credentials: 'same-origin'
+    });
+    if (!response.ok) return;
+    const result = await response.json();
+    renderMaterials(result.materials);
+    renderPagination(result);
 };
 
 const renderTagSuggestions = tags => {
@@ -190,20 +251,17 @@ document.addEventListener('click', event => {
     if (!event.target.closest('.search-input-wrap')) hideTagSuggestions();
 });
 
-searchForm.addEventListener('submit', async event => {
+searchForm.addEventListener('submit', event => {
     event.preventDefault();
-    const keywords = selectedTags.length ? selectedTags : getTagKeywords(searchKeyword.value);
-    const parameters = new URLSearchParams();
-    if (searchType() === 'tag') {
-        keywords.forEach(keyword => parameters.append('tags', keyword));
-    } else {
-        parameters.set('title', searchKeyword.value.trim());
-    }
-    const response = await fetch(`/material?${parameters}`, {
-        credentials: 'same-origin'
-    });
-    if (!response.ok) return;
-    renderMaterials(await response.json());
+    activeSearchParameters = createSearchParameters();
+    loadMaterialPage(1);
+});
+
+activeSearchParameters = createSearchParameters();
+renderPagination({
+    currentPage: Number(pageNavigation.dataset.currentPage),
+    totalPages: Number(pageNavigation.dataset.totalPages),
+    totalElements: Number(pageNavigation.dataset.totalElements)
 });
 
 if (queryTag || queryTags.length) searchForm.requestSubmit();

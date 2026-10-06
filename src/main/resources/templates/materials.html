@@ -68,6 +68,8 @@
             <button class="tag-suggestion" type="button" role="option"></button>
         </template>
         <div id="emptyMessage" class="empty" th:hidden="${!#lists.isEmpty(materials)}">No materials registered.</div>
+        <nav id="pageNavigation" class="pagination" aria-label="Material pages"
+             th:attr="data-current-page=${currentPage},data-total-pages=${totalPages},data-total-elements=${totalElements}"></nav>
     </section>
 </main>
     <script th:src="@{/js/materials.js}"></script>

@@ -10,5 +10,6 @@ public interface EdgeMapper {
     List<EdgeDomain> selectEdge(int mindmapId);
     int insertEdge(EdgeDomain edgeDomain);
     int deleteEdge(@Param("id") int id);
-    int updateEdge(EdgeDomain edgeDomain);
+    int updateEdgeName(EdgeDomain edgeDomain);
+    int updateEdgeStyle(EdgeDomain edgeDomain);
 }

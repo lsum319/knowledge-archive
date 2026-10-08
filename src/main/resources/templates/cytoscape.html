@@ -30,7 +30,46 @@
             </div>
         </div>
         <div id="graphWorkspace" class="graph-workspace">
-            <div id="cy" class="cytoscape-graph" aria-label="Mindmap graph"></div>
+            <div id="cy" class="cytoscape-graph" aria-label="Mindmap graph">
+                <section id="graphContextMenu" class="graph-context-menu" role="dialog" aria-labelledby="graphContextMenuTitle" hidden>
+                    <div class="graph-context-menu-header">
+                        <h2 id="graphContextMenuTitle">Element style</h2>
+                        <button id="closeGraphContextMenu" class="icon-button" type="button" aria-label="Close style menu">×</button>
+                    </div>
+                    <div id="nodeStyleOptions" class="graph-style-options" hidden>
+                        <label for="nodeStyleColor">Color</label>
+                        <input id="nodeStyleColor" type="color" value="#0f766e">
+                        <label for="nodeStyleShape">Shape</label>
+                        <select id="nodeStyleShape">
+                            <option value="ellipse">Ellipse</option>
+                            <option value="round-rectangle">Rounded rectangle</option>
+                            <option value="diamond">Diamond</option>
+                            <option value="hexagon">Hexagon</option>
+                            <option value="rectangle">Rectangle</option>
+                        </select>
+                        <label for="nodeStyleSize">Size</label>
+                        <input id="nodeStyleSize" type="range" min="60" max="150" step="10" value="90">
+                    </div>
+                    <div id="edgeStyleOptions" class="graph-style-options" hidden>
+                        <label for="edgeStyleColor">Color</label>
+                        <input id="edgeStyleColor" type="color" value="#94a3b8">
+                        <label for="edgeStyleWidth">Width</label>
+                        <input id="edgeStyleWidth" type="range" min="1" max="8" step="1" value="2">
+                        <label for="edgeStyleLine">Line</label>
+                        <select id="edgeStyleLine">
+                            <option value="solid">Solid</option>
+                            <option value="dashed">Dashed</option>
+                            <option value="dotted">Dotted</option>
+                        </select>
+                        <label for="edgeStyleName">Name</label>
+                        <input id="edgeStyleName" type="text" maxlength="100" aria-label="Connection name">
+                        <button id="saveEdgeStyleName" class="button secondary" type="button">Save name</button>
+                    </div>
+                    <div class="graph-context-menu-actions">
+                        <button id="resetElementStyle" class="button secondary" type="button">Reset style</button>
+                    </div>
+                </section>
+            </div>
             <aside id="nodeSidebar" class="node-sidebar" aria-labelledby="nodeSidebarTitle">
                 <div class="node-sidebar-header">
                     <div>

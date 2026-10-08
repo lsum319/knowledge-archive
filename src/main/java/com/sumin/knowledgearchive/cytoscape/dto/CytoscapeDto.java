@@ -1,5 +1,7 @@
 package com.sumin.knowledgearchive.cytoscape.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.List;
 
 public class CytoscapeDto {
@@ -20,7 +22,8 @@ public class CytoscapeDto {
     // 3. Node 관련 DTO
     public record Node(
         NodeData data,
-        Position position
+        Position position,
+        JsonNode style
 //        ,String classes // CSS 클래스 (선택)
     ) {}
 
@@ -38,7 +41,8 @@ public class CytoscapeDto {
 
     // 4. Edge 관련 DTO
     public record Edge(
-        EdgeData data
+        EdgeData data,
+        JsonNode style
     ) {}
 
     public record EdgeData(

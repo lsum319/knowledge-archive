@@ -5,9 +5,8 @@ spring:
     active: local
 
 mybatis:
-  configuration:
-    map-underscore-to-camel-case: true
   mapper-locations: classpath:mapper/**/*.xml
+  config-location: classpath:mybatis-config.xml
 
 management:
   endpoints:

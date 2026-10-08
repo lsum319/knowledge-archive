@@ -37,7 +37,9 @@ public class CytoscapeService {
                                             // 개별 좌표 : 출발노드 id, 도착노드 id
                                             new CytoscapeDto.Position(
                                                             data.getCoordX(),
-                                                            data.getCoordY())))
+                                                            data.getCoordY()),
+                                                            data.getStyle()
+                            ))
                             .toList();
 
             // edge 세팅
@@ -48,7 +50,9 @@ public class CytoscapeService {
                                                             String.valueOf(data.getId()),
                                                             String.valueOf(data.getSourceId()),
                                                             String.valueOf(data.getTargetId()),
-                                                            data.getName())))
+                                                            data.getName()),
+                                                            data.getStyle()
+                            ))
                             .toList();
 
             return CytoscapeDto.CytoscapeResponse.of(nodes, edges);

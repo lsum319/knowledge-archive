@@ -18,6 +18,17 @@ const nodeUrlInput = document.getElementById('nodeUrl');
 const nodeMemoInput = document.getElementById('nodeMemo');
 const nodeTags = document.getElementById('nodeTags');
 const toggleNodeSidebar = document.getElementById('toggleNodeSidebar');
+const graphContextMenu = document.getElementById('graphContextMenu');
+const graphContextMenuTitle = document.getElementById('graphContextMenuTitle');
+const nodeStyleOptions = document.getElementById('nodeStyleOptions');
+const edgeStyleOptions = document.getElementById('edgeStyleOptions');
+const nodeStyleColor = document.getElementById('nodeStyleColor');
+const nodeStyleShape = document.getElementById('nodeStyleShape');
+const nodeStyleSize = document.getElementById('nodeStyleSize');
+const edgeStyleColor = document.getElementById('edgeStyleColor');
+const edgeStyleWidth = document.getElementById('edgeStyleWidth');
+const edgeStyleLine = document.getElementById('edgeStyleLine');
+const edgeStyleName = document.getElementById('edgeStyleName');
 let hideMemoTooltipTimer;
 let hoveredMemoNode;
 let keyboardSelectedNode;
@@ -30,6 +41,14 @@ let selectedExistingMaterialId;
 let materialSearchTimer;
 let materialSearchRequestId = 0;
 const memoCache = new Map();
+const nodeShapes = new Set(['ellipse', 'round-rectangle', 'diamond', 'hexagon', 'rectangle']);
+const edgeLineStyles = new Set(['solid', 'dashed', 'dotted']);
+const defaultNodeStyle = {color: '#0f766e', shape: 'ellipse', size: 90};
+const defaultEdgeStyle = {color: '#94a3b8', width: 2, lineStyle: 'solid'};
+let graphElementStyles = {nodes: {}, edges: {}};
+let contextMenuElement;
+const graphElementStyleSaveTimers = new Map();
+const graphElementStyleSaveQueues = new Map();
 
 const memoTooltip = document.createElement('div');
 memoTooltip.className = 'node-memo-tooltip';
@@ -91,7 +110,7 @@ const openMemoEditor = (node, initialMemo = '', method = 'POST') => {
         const nodeId = Number(node.data('id'));
 
         try {
-            const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}`, {
+            const response = await fetch(`/mindmap/${encodeURIComponent(nodeId)}/node`, {
                 method,
                 credentials: 'same-origin',
                 headers: {'Content-Type': 'application/json'},
@@ -136,7 +155,7 @@ const openMemoEditorForEmptyNode = async node => {
 
     if (memo === undefined) {
         try {
-            const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}`, {credentials: 'same-origin'});
+            const response = await fetch(`/mindmap/${encodeURIComponent(nodeId)}/node`, {credentials: 'same-origin'});
             if (!response.ok) throw new Error();
             memo = await response.text();
             memoCache.set(nodeId, memo);
@@ -162,7 +181,7 @@ const showMemoTooltip = async node => {
     }
 
     try {
-        const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}`, {credentials: 'same-origin'});
+        const response = await fetch(`/mindmap/${encodeURIComponent(nodeId)}/node`, {credentials: 'same-origin'});
         if (!response.ok) throw new Error();
 
         const memo = await response.text();
@@ -213,6 +232,56 @@ const setDetailsMessage = (text, success = false) => {
 const setCreateNodeMessage = (text, success = false) => {
     createNodeMessage.textContent = text;
     createNodeMessage.className = `message${success ? ' success' : ' error'}`;
+};
+
+const loadGraphElementStyles = graph => {
+    const styles = {nodes: {}, edges: {}};
+    for (const node of graph.elements.nodes) {
+        const style = node.style;
+        if (!style || typeof style !== 'object' || !/^#[0-9a-f]{6}$/i.test(style.color) || !nodeShapes.has(style.shape)
+            || !Number.isInteger(style.size) || style.size < 60 || style.size > 150) continue;
+        styles.nodes[node.data.id] = {color: style.color, shape: style.shape, size: style.size};
+    }
+    for (const edge of graph.elements.edges) {
+        const style = edge.style;
+        if (!style || typeof style !== 'object' || !/^#[0-9a-f]{6}$/i.test(style.color) || !edgeLineStyles.has(style.lineStyle)
+            || !Number.isInteger(style.width) || style.width < 1 || style.width > 8) continue;
+        styles.edges[edge.data.id] = {color: style.color, lineStyle: style.lineStyle, width: style.width};
+    }
+    return styles;
+};
+
+const saveGraphElementStyle = (element, isNode, style, successMessage) => {
+    const id = element.id();
+    const key = `${isNode ? 'node' : 'edge'}:${id}`;
+    clearTimeout(graphElementStyleSaveTimers.get(key));
+    graphElementStyleSaveTimers.set(key, setTimeout(async () => {
+        graphElementStyleSaveTimers.delete(key);
+        const previousSave = graphElementStyleSaveQueues.get(key) || Promise.resolve();
+        const currentSave = previousSave.catch(() => {}).then(async () => {
+            const response = await fetch(
+                isNode ? `/mindmap/node/${encodeURIComponent(id)}/style` : '/edge/style',
+                {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(isNode ? {style} : {id: Number(id), style})
+                }
+            );
+            if (!response.ok) throw new Error();
+        });
+        graphElementStyleSaveQueues.set(key, currentSave);
+        try {
+            await currentSave;
+            if (successMessage) setMessage(successMessage, true);
+        } catch {
+            setMessage('Failed to save element style.');
+        } finally {
+            if (graphElementStyleSaveQueues.get(key) === currentSave) {
+                graphElementStyleSaveQueues.delete(key);
+            }
+        }
+    }, 250));
 };
 
 const setSidebarOpen = isOpen => {
@@ -372,6 +441,7 @@ const loadGraph = async () => {
     if (!response.ok) throw new Error('Failed to load graph data.');
 
     const graph = await response.json();
+    graphElementStyles = loadGraphElementStyles(graph);
     const nodeCount = graph.elements.nodes.length;
     graph.elements.nodes.push({
         data: {id: 'mindmap-title', title: window.mindmapTitle},
@@ -427,10 +497,8 @@ const loadGraph = async () => {
             {
                 selector: 'node:selected',
                 style: {
-                    'background-color': '#f59e0b',
                     'border-color': '#b45309',
-                    'border-width': 4,
-                    color: '#422006'
+                    'border-width': 4
                 }
             },
             {
@@ -473,10 +541,9 @@ const loadGraph = async () => {
             {
                 selector: 'edge:selected',
                 style: {
-                    width: 5,
-                    'line-color': '#dc2626',
-                    'target-arrow-color': '#dc2626',
-                    color: '#991b1b'
+                    'overlay-color': '#f59e0b',
+                    'overlay-opacity': 0.4,
+                    'overlay-padding': 4
                 }
             },
             {
@@ -493,11 +560,138 @@ const loadGraph = async () => {
         }
     });
 
+    cy.nodes().forEach(node => {
+        const style = graphElementStyles.nodes[node.id()];
+        if (style) node.style({
+            'background-color': style.color,
+            shape: style.shape,
+            width: style.size,
+            height: style.size
+        });
+    });
+    cy.edges().forEach(edge => {
+        const style = graphElementStyles.edges[edge.id()];
+        if (style) edge.style({
+            'line-color': style.color,
+            'target-arrow-color': style.color,
+            width: style.width,
+            'line-style': style.lineStyle
+        });
+    });
+
     let connectionPreviewNode;
     let connectionSourceNode;
     let lastPointerEvent;
     let tapSelectionTimer;
     let edgeNameEditor;
+
+    const closeGraphContextMenu = () => {
+        graphContextMenu.hidden = true;
+        contextMenuElement = undefined;
+    };
+
+    const applyElementStyle = (element, isNode, style) => {
+        if (isNode) {
+            element.style({
+                'background-color': style.color,
+                shape: style.shape,
+                width: style.size,
+                height: style.size
+            });
+            return;
+        }
+
+        element.style({
+            'line-color': style.color,
+            'target-arrow-color': style.color,
+            width: style.width,
+            'line-style': style.lineStyle
+        });
+    };
+
+    const showGraphContextMenu = (element, event) => {
+        if (element.hasClass('connection-preview') || element.id() === 'mindmap-title') return;
+
+        contextMenuElement = element;
+        const isNode = element.isNode();
+        graphContextMenuTitle.textContent = isNode ? 'Node style' : 'Edge style';
+        nodeStyleOptions.hidden = !isNode;
+        edgeStyleOptions.hidden = isNode;
+        if (isNode) {
+            const style = {...defaultNodeStyle, ...graphElementStyles.nodes[element.id()]};
+            nodeStyleColor.value = style.color;
+            nodeStyleShape.value = style.shape;
+            nodeStyleSize.value = style.size;
+        } else {
+            const style = {...defaultEdgeStyle, ...graphElementStyles.edges[element.id()]};
+            edgeStyleColor.value = style.color;
+            edgeStyleWidth.value = style.width;
+            edgeStyleLine.value = style.lineStyle;
+            edgeStyleName.value = element.data('label') || '';
+        }
+
+        graphContextMenu.hidden = false;
+        const margin = 8;
+        graphContextMenu.style.left = `${Math.max(margin, Math.min(
+            event.renderedPosition.x,
+            graphContainer.clientWidth - graphContextMenu.offsetWidth - margin
+        ))}px`;
+        graphContextMenu.style.top = `${Math.max(margin, Math.min(
+            event.renderedPosition.y,
+            graphContainer.clientHeight - graphContextMenu.offsetHeight - margin
+        ))}px`;
+    };
+
+    const updateContextElementStyle = () => {
+        if (!contextMenuElement) return;
+
+        const isNode = contextMenuElement.isNode();
+        const style = isNode
+            ? {color: nodeStyleColor.value, shape: nodeStyleShape.value, size: Number(nodeStyleSize.value)}
+            : {
+                color: edgeStyleColor.value,
+                width: Number(edgeStyleWidth.value),
+                lineStyle: edgeStyleLine.value
+            };
+        const styles = isNode ? graphElementStyles.nodes : graphElementStyles.edges;
+        styles[contextMenuElement.id()] = style;
+        applyElementStyle(contextMenuElement, isNode, style);
+        saveGraphElementStyle(contextMenuElement, isNode, style);
+    };
+
+    graphContextMenu.addEventListener('click', event => event.stopPropagation());
+    ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'wheel', 'contextmenu'].forEach(type => {
+        graphContextMenu.addEventListener(type, event => {
+            event.stopPropagation();
+            if (type === 'contextmenu') event.preventDefault();
+        });
+    });
+    document.getElementById('closeGraphContextMenu').addEventListener('click', closeGraphContextMenu);
+    document.getElementById('resetElementStyle').addEventListener('click', () => {
+        if (!contextMenuElement) return;
+
+        const isNode = contextMenuElement.isNode();
+        const styles = isNode ? graphElementStyles.nodes : graphElementStyles.edges;
+        const style = {...(isNode ? defaultNodeStyle : defaultEdgeStyle)};
+        styles[contextMenuElement.id()] = style;
+        applyElementStyle(contextMenuElement, isNode, style);
+        saveGraphElementStyle(contextMenuElement, isNode, style, 'Element style reset.');
+        showGraphContextMenu(contextMenuElement, {
+            renderedPosition: {
+                x: Number.parseFloat(graphContextMenu.style.left),
+                y: Number.parseFloat(graphContextMenu.style.top)
+            }
+        });
+    });
+    [nodeStyleColor, nodeStyleSize, edgeStyleColor, edgeStyleWidth].forEach(input => {
+        input.addEventListener('input', updateContextElementStyle);
+    });
+    [nodeStyleShape, edgeStyleLine].forEach(input => {
+        input.addEventListener('change', updateContextElementStyle);
+    });
+    document.getElementById('saveEdgeStyleName').addEventListener('click', () => {
+        if (contextMenuElement?.isEdge()) saveEdgeName(contextMenuElement, edgeStyleName.value.trim());
+    });
 
     const positionEdgeNameEditor = () => {
         if (!edgeNameEditor || edgeNameEditor.edge.removed()) return;
@@ -633,7 +827,7 @@ const loadGraph = async () => {
 
     const saveEdgeName = async (edge, name) => {
         try {
-            const response = await fetch('/edge', {
+            const response = await fetch('/edge/name', {
                 method: 'PUT',
                 credentials: 'same-origin',
                 headers: {'Content-Type': 'application/json'},
@@ -856,6 +1050,9 @@ const loadGraph = async () => {
         event.preventDefault();
         cancelConnection();
     });
+    document.addEventListener('click', event => {
+        if (!graphContextMenu.hidden && !graphContextMenu.contains(event.target)) closeGraphContextMenu();
+    });
     document.addEventListener('keydown', event => {
         if (event.key === 'Enter') {
             const target = event.target;
@@ -865,8 +1062,13 @@ const loadGraph = async () => {
             event.preventDefault();
             openMemoEditorForEmptyNode(keyboardSelectedNode);
         }
-        if (event.key === 'Escape') cancelConnection();
+        if (event.key === 'Escape') {
+            cancelConnection();
+            closeGraphContextMenu();
+        }
         if (event.key === 'Delete') {
+            const target = event.target;
+            if (target instanceof Element && target.closest('button, input, select, textarea, [contenteditable="true"]')) return;
             event.preventDefault();
             deleteSelectedElements();
         }
@@ -896,7 +1098,10 @@ const loadGraph = async () => {
     cy.on('cxttapend', () => {
         backgroundPanPosition = undefined;
     });
-    cy.on('cxttap', 'node', event => loadNodeDetails(event.target));
+    cy.on('cxttap', 'node', event => {
+        loadNodeDetails(event.target);
+        showGraphContextMenu(event.target, event);
+    });
     cy.on('tap', 'node, edge', event => {
         if (connectionPreviewNode && event.target.isNode()) {
             const targetNode = event.target;
@@ -904,6 +1109,7 @@ const loadGraph = async () => {
             return;
         }
 
+        closeGraphContextMenu();
         keyboardSelectedNode = event.target.isNode() ? event.target : undefined;
         clearTimeout(tapSelectionTimer);
         tapSelectionTimer = setTimeout(() => {
@@ -920,15 +1126,12 @@ const loadGraph = async () => {
         cy.elements().unselect();
         keyboardSelectedNode = undefined;
         closeMemoTooltip();
+        closeGraphContextMenu();
         clearNodeDetails();
     });
     cy.on('pan zoom position', () => positionMemoTooltip(hoveredMemoNode));
     cy.on('pan zoom position resize', positionEdgeNameEditor);
-    cy.on('cxttap', 'edge', event => {
-        const edge = event.target;
-        const name = prompt('Enter a name for this connection.', edge.data('label') || '');
-        if (name !== null) saveEdgeName(edge, name.trim());
-    });
+    cy.on('cxttap', 'edge', event => showGraphContextMenu(event.target, event));
     cy.on('dbltap', 'edge', event => {
         clearTimeout(tapSelectionTimer);
         startEdgeNameEdit(event.target);

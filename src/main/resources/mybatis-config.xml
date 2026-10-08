@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <settings>
+        <!-- 언더스코어 표기법을 카멜케이스로 자동 변환 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+    <typeHandlers>
+        <typeHandler handler="com.sumin.knowledgearchive.common.mybatis.JsonNodeTypeHandler"/>
+    </typeHandlers>
+</configuration>

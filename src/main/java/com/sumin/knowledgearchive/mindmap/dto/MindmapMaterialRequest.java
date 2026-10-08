@@ -1,5 +1,6 @@
 package com.sumin.knowledgearchive.mindmap.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sumin.knowledgearchive.mindmap.MindmapMaterialDomain;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ public class MindmapMaterialRequest {
     private int materialId;
     private float coordX;
     private float coordY;
+    private JsonNode style;
 
     public MindmapMaterialDomain toDomain(){
         MindmapMaterialDomain domain = new MindmapMaterialDomain();
@@ -18,6 +20,7 @@ public class MindmapMaterialRequest {
         domain.setMaterialId(materialId);
         domain.setCoordX(coordX);
         domain.setCoordY(coordY);
+        domain.setStyle(style);
         return domain;
     }
 }

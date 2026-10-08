@@ -19,7 +19,12 @@ public class EdgeService {
         edgeMapper.deleteEdge(id);
     }
 
-    public void updateEdge(EdgeRequest edgeRequest) {
-        edgeMapper.updateEdge(edgeRequest.toDomain());
+    public void updateEdgeName(EdgeRequest edgeRequest) {
+        edgeMapper.updateEdgeName(edgeRequest.toDomain());
     }
+
+    public void updateEdgeStyle(EdgeRequest edgeRequest) {
+        edgeMapper.updateEdgeStyle(edgeRequest.toDomain());
+    }
+
 }

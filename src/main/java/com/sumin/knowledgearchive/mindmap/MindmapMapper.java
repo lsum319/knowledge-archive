@@ -26,11 +26,11 @@ public interface MindmapMapper {
     // 개별 노드의 툴팁 조회
     String selectNodeMemoById(@Param("id") int id);
 
-    // 개별 노드의 툴팁 메모 작성
-    int insertNodeMemo(MindmapMaterialDomain mindmapMaterialDomain);
-
-    // 개별 노드의 툴팁 메모 수정
+    // 개별 노드의 툴팁 메모 작성/수정
     int updateNodeMemo(MindmapMaterialDomain mindmapMaterialDomain);
+
+    // 개별 노드의 스타일 수정
+    int updateNodeStyle(MindmapMaterialDomain mindmapMaterialDomain);
 
     // cytoscape를 위한 nodeData(material data, 좌표) 조회
     List<MindmapMaterialDomain> selectNodeDataById(

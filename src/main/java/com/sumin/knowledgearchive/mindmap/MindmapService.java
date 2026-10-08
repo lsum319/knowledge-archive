@@ -37,16 +37,17 @@ public class MindmapService {
         return mindmapMapper.selectNodeMemoById(id);
     }
 
-    // 개별 노드의 툴팁 메모 생성
-    public void insertNodeMemo(NodeMemoRequest request){
-        mindmapMapper.insertNodeMemo(request.toDomain());
-    }
-
-    // 개별 노드의 툴팁 메모 수정
+    // 개별 노드의 툴팁 메모 작성/수정
     public void updateNodeMemo(NodeMemoRequest request){
         mindmapMapper.updateNodeMemo(request.toDomain());
     }
+    
+    // 노드 스타일 수정
+    public void updateNodeStyle(MindmapMaterialRequest request){
+        mindmapMapper.updateNodeStyle(request.toDomain());
+    }
 
+    // 마인드맵 생성
     public void insertMindmap(CreateMindmapRequest request){
         int userId = SecurityUtils.getCurrentUserId();
         request.setUserId(userId);

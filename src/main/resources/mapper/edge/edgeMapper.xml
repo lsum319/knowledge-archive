@@ -5,12 +5,28 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.sumin.knowledgearchive.edge.EdgeMapper">
-    <select id="selectEdge" parameterType="int" resultType="com.sumin.knowledgearchive.edge.EdgeDomain">
+
+    <resultMap id="edgeResultMap"
+               type="com.sumin.knowledgearchive.edge.EdgeDomain">
+
+        <result property="id" column="id"/>
+        <result property="mindmapId" column="mindmap_id"/>
+        <result property="sourceId" column="source_id"/>
+        <result property="targetId" column="target_id"/>
+        <result property="name" column="name"/>
+        <result property="style"
+                column="style"
+                typeHandler="com.sumin.knowledgearchive.common.mybatis.JsonNodeTypeHandler"/>
+
+    </resultMap>
+
+    <select id="selectEdge" parameterType="int" resultMap="edgeResultMap">
         SELECT
             id
             ,source_id
             ,target_id
             ,name
+            ,style
         FROM "EDGE" e
         WHERE mindmap_id = #{mindmapId}
     </select>
@@ -36,9 +52,17 @@
         WHERE id = #{id}
     </delete>
 
-    <update id="updateEdge" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
+    <update id="updateEdgeName" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
         UPDATE "EDGE"
         SET name = #{name}
         WHERE id = #{id}
     </update>
+
+    <update id="updateEdgeStyle" parameterType="com.sumin.knowledgearchive.edge.EdgeDomain">
+        UPDATE "EDGE"
+        SET style = #{style, typeHandler=com.sumin.knowledgearchive.common.mybatis.JsonNodeTypeHandler}
+        WHERE id = #{id}
+    </update>
+
+
 </mapper>

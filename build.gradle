@@ -37,7 +37,11 @@ dependencies {
 	// JWT의 JSON 처리
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
+
+	// PGobject 참조를 위한 설정 변경
+	//	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.postgresql:postgresql'
+
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'

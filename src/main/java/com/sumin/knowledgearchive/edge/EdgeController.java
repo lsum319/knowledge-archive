@@ -25,9 +25,15 @@ public class EdgeController {
         edgeService.deleteEdge(id);
     }
 
-    @Operation(summary = "자료 관계 이름 등록")
-    @PutMapping
-    public void updateEdge(@RequestBody EdgeRequest request) {
-        edgeService.updateEdge(request);
+    @Operation(summary = "자료 관계 이름 수정")
+    @PutMapping("/name")
+    public void updateEdgeName(@RequestBody EdgeRequest request) {
+        edgeService.updateEdgeName(request);
+    }
+
+    @Operation(summary = "자료 관계 스타일 수정")
+    @PutMapping("/style")
+    public void updateEdgeStyle(@RequestBody EdgeRequest request) {
+        edgeService.updateEdgeStyle(request);
     }
 }

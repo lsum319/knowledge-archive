@@ -34,25 +34,25 @@ public class MindmapController {
     
     // 툴팁 조회
     @Operation(summary = "마인드맵의 특정 노드의 memo조회")
-    @GetMapping("/node/{id}")
+    @GetMapping("/node/{id}/memo")
     public String selectNodeMemoById(@PathVariable("id") int id){
         return mindmapService.selectNodeMemoById(id);
     }
 
-    // 툴팁 작성
-    @Operation(summary = "마인드맵의 특정 노드의 memo 작성")
-    @PostMapping("/node/{id}")
-    public void insertNodeMemo(@PathVariable("id") int id, @RequestBody NodeMemoRequest request){
-        request.setId(id);
-        mindmapService.insertNodeMemo(request);
-    }
-
     // 툴팁 수정
     @Operation(summary = "마인드맵의 특정 노드의 memo 수정")
-    @PutMapping("/node/{id}")
+    @PutMapping("/node/{id}/memo")
     public void updateNodeMemo(@PathVariable("id") int id, @RequestBody NodeMemoRequest request) {
         request.setId(id);
         mindmapService.updateNodeMemo(request);
+    }
+
+    // 노드 스타일 수정
+    @Operation(summary = "노드 스타일 수정")
+    @PutMapping("/node/{id}/style")
+    public void updateNodeStyle(@PathVariable("id") int id, @RequestBody MindmapMaterialRequest request) {
+        request.setId(id);
+        mindmapService.updateNodeStyle(request);
     }
     
     // 노드 생성 시 기존에 작성된 material 검색

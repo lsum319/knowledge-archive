@@ -17,7 +17,6 @@ const nodeTitleInput = document.getElementById('nodeTitle');
 const nodeUrlInput = document.getElementById('nodeUrl');
 const nodeMemoInput = document.getElementById('nodeMemo');
 const nodeTags = document.getElementById('nodeTags');
-const toggleNodeSidebar = document.getElementById('toggleNodeSidebar');
 const graphContextMenu = document.getElementById('graphContextMenu');
 const graphContextMenuTitle = document.getElementById('graphContextMenuTitle');
 const nodeStyleOptions = document.getElementById('nodeStyleOptions');
@@ -46,6 +45,19 @@ const edgeLineStyles = new Set(['solid', 'dashed', 'dotted']);
 const defaultNodeStyle = {color: '#0f766e', shape: 'ellipse', size: 90};
 const defaultEdgeStyle = {color: '#94a3b8', width: 2, lineStyle: 'solid'};
 let graphElementStyles = {nodes: {}, edges: {}};
+const getReadableTextColor = backgroundColor => {
+    const linearizeChannel = offset => {
+        const channel = Number.parseInt(backgroundColor.slice(offset, offset + 2), 16) / 255;
+        return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = 0.2126 * linearizeChannel(1)
+        + 0.7152 * linearizeChannel(3)
+        + 0.0722 * linearizeChannel(5);
+    const whiteContrast = 1.05 / (luminance + 0.05);
+    const blackContrast = (luminance + 0.05) / 0.05;
+
+    return whiteContrast >= blackContrast ? '#ffffff' : '#000000';
+};
 let contextMenuElement;
 const graphElementStyleSaveTimers = new Map();
 const graphElementStyleSaveQueues = new Map();
@@ -88,7 +100,7 @@ const renderMemoTooltip = (node, memo) => {
     positionMemoTooltip(node);
 };
 
-const openMemoEditor = (node, initialMemo = '', method = 'POST') => {
+const openMemoEditor = (node, initialMemo = '') => {
     clearTimeout(hideMemoTooltipTimer);
     hoveredMemoNode = node;
     isMemoNodeHovered = false;
@@ -110,8 +122,8 @@ const openMemoEditor = (node, initialMemo = '', method = 'POST') => {
         const nodeId = Number(node.data('id'));
 
         try {
-            const response = await fetch(`/mindmap/${encodeURIComponent(nodeId)}/node`, {
-                method,
+            const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}/memo`, {
+                method: 'PUT',
                 credentials: 'same-origin',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({id: nodeId, memo})
@@ -145,7 +157,7 @@ memoTooltip.addEventListener('click', () => {
     const nodeId = String(hoveredMemoNode.data('id'));
     const memo = memoCache.get(nodeId);
     if (typeof memo === 'string' && /[^ ]/.test(memo)) {
-        openMemoEditor(hoveredMemoNode, memo, 'PUT');
+        openMemoEditor(hoveredMemoNode, memo);
     }
 });
 
@@ -155,7 +167,7 @@ const openMemoEditorForEmptyNode = async node => {
 
     if (memo === undefined) {
         try {
-            const response = await fetch(`/mindmap/${encodeURIComponent(nodeId)}/node`, {credentials: 'same-origin'});
+            const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}/memo`, {credentials: 'same-origin'});
             if (!response.ok) throw new Error();
             memo = await response.text();
             memoCache.set(nodeId, memo);
@@ -181,7 +193,7 @@ const showMemoTooltip = async node => {
     }
 
     try {
-        const response = await fetch(`/mindmap/${encodeURIComponent(nodeId)}/node`, {credentials: 'same-origin'});
+        const response = await fetch(`/mindmap/node/${encodeURIComponent(nodeId)}/memo`, {credentials: 'same-origin'});
         if (!response.ok) throw new Error();
 
         const memo = await response.text();
@@ -287,8 +299,6 @@ const saveGraphElementStyle = (element, isNode, style, successMessage) => {
 const setSidebarOpen = isOpen => {
     graphWorkspace.classList.toggle('sidebar-collapsed', !isOpen);
     nodeSidebar.hidden = false;
-    toggleNodeSidebar.textContent = isOpen ? 'Hide details' : 'Show details';
-    toggleNodeSidebar.setAttribute('aria-expanded', String(isOpen));
 };
 
 const renderNodeTags = selectedTagIds => {
@@ -455,6 +465,9 @@ const loadGraph = async () => {
         container: graphContainer,
         elements: graph.elements,
         wheelSensitivity: 0.2,
+        pixelRatio: 1,
+        hideEdgesOnViewport: true,
+        textureOnViewport: true,
         boxSelectionEnabled: true,
         userPanningEnabled: false,
         selectionType: 'single',
@@ -472,6 +485,7 @@ const loadGraph = async () => {
                     'text-valign': 'center',
                     'text-halign': 'center',
                     'font-size': 13,
+                    'min-zoomed-font-size': 9,
                     'font-weight': 700,
                     width: 90,
                     height: 90
@@ -521,11 +535,10 @@ const loadGraph = async () => {
                     'target-arrow-shape': 'triangle',
                     'curve-style': 'bezier',
                     label: 'data(label)',
+                    'edge-text-rotation': 'none',
                     color: '#475569',
-                    'font-size': 11,
-                    'text-background-color': '#ffffff',
-                    'text-background-opacity': 1,
-                    'text-background-padding': 3
+                    'font-size': 12,
+                    'min-zoomed-font-size': 10,
                 }
             },
             {
@@ -560,22 +573,25 @@ const loadGraph = async () => {
         }
     });
 
-    cy.nodes().forEach(node => {
-        const style = graphElementStyles.nodes[node.id()];
-        if (style) node.style({
-            'background-color': style.color,
-            shape: style.shape,
-            width: style.size,
-            height: style.size
+    cy.batch(() => {
+        cy.nodes().forEach(node => {
+            const style = graphElementStyles.nodes[node.id()];
+            if (style) node.style({
+                'background-color': style.color,
+                color: getReadableTextColor(style.color),
+                shape: style.shape,
+                width: style.size,
+                height: style.size
+            });
         });
-    });
-    cy.edges().forEach(edge => {
-        const style = graphElementStyles.edges[edge.id()];
-        if (style) edge.style({
-            'line-color': style.color,
-            'target-arrow-color': style.color,
-            width: style.width,
-            'line-style': style.lineStyle
+        cy.edges().forEach(edge => {
+            const style = graphElementStyles.edges[edge.id()];
+            if (style) edge.style({
+                'line-color': style.color,
+                'target-arrow-color': style.color,
+                width: style.width,
+                'line-style': style.lineStyle
+            });
         });
     });
 
@@ -594,6 +610,7 @@ const loadGraph = async () => {
         if (isNode) {
             element.style({
                 'background-color': style.color,
+                color: getReadableTextColor(style.color),
                 shape: style.shape,
                 width: style.size,
                 height: style.size
@@ -660,7 +677,8 @@ const loadGraph = async () => {
     };
 
     graphContextMenu.addEventListener('click', event => event.stopPropagation());
-    ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'wheel', 'contextmenu'].forEach(type => {
+    ['pointerdown', 'pointermove', 'pointerup', 'mousedown', 'mousemove', 'mouseup',
+        'touchstart', 'touchmove', 'touchend', 'wheel', 'contextmenu'].forEach(type => {
         graphContextMenu.addEventListener(type, event => {
             event.stopPropagation();
             if (type === 'contextmenu') event.preventDefault();
@@ -919,10 +937,6 @@ const loadGraph = async () => {
     };
 
     graphContainer.addEventListener('mousemove', moveConnectionPreview);
-    toggleNodeSidebar.addEventListener('click', () => {
-        const isOpen = toggleNodeSidebar.getAttribute('aria-expanded') === 'true';
-        setSidebarOpen(!isOpen);
-    });
     document.getElementById('closeNodeSidebar').addEventListener('click', () => setSidebarOpen(false));
     document.getElementById('createNodeButton').addEventListener('click', showCreateNodeForm);
     document.getElementById('cancelCreateNode').addEventListener('click', hideCreateNodeForm);
